@@ -13,11 +13,11 @@
  * @package           Add_to_basket
  *
  * @wordpress-plugin
- * Plugin Name:       Add To Basket
+ * Plugin Name:       Add To Basket : Instant Payments
  * Plugin URI:        https://addtobasket.net/
  * Description:       Instant payment solution for you.
  * Version:           1.0.0
- * Author:            Fungai Marshall
+ * Author:            Fungai Marshall, Gunes Erdemi
  * Author URI:        https://marshallfungai.github.io/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt

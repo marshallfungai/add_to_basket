@@ -58,6 +58,17 @@ class Add_to_basket {
 	protected $version;
 
 	/**
+	 * Sanitizer for cleaning user input
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      Add_to_basket_Sanitize    $sanitizer    Sanitizes data
+	 */
+	private $sanitizer;
+
+
+
+	/**
 	 * Define the core functionality of the plugin.
 	 *
 	 * Set the plugin name and the plugin version that can be used throughout the plugin.
@@ -122,7 +133,18 @@ class Add_to_basket {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-add_to_basket-public.php';
 
+		/**
+		 * The class responsible for sanitizing user input
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-add_to_basket-sanitize.php';
+
+		/**
+		 * The class responsible for all global functions.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/add-to-basket-global-functions.php';
+
 		$this->loader = new Add_to_basket_Loader();
+		$this->sanitizer = new Add_to_basket_Sanitize();
 
 	}
 
@@ -156,7 +178,17 @@ class Add_to_basket {
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+		$this->loader->add_action( 'init', $plugin_admin, 'fn_add_to_basket_admin' );
+		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_plugin_admin_menu' ); // Add menu item
 
+        // Add Settings link to the plugin
+		$plugin_basename = plugin_basename( plugin_dir_path( __DIR__ ) . $this->plugin_name . '.php' );
+		$this->loader->add_filter( 'plugin_action_links_' . $plugin_basename, $plugin_admin, 'add_action_links' );
+		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_menu' );
+		//$this->loader->add_action('admin_init', $plugin_admin, 'options_update');
+		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_sections' );
+		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_settings' );
+		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_fields' );
 	}
 
 	/**
@@ -172,6 +204,8 @@ class Add_to_basket {
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+		$this->loader->add_action( 'init', $plugin_public, 'register_shortcodes' );
 
 	}
 
