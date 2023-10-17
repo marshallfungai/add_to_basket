@@ -245,27 +245,12 @@ class Add_to_basket_Admin {
 		//include( plugin_dir_path( __FILE__ ) . 'partials/add_to_basket-admin-page-settings.php' );
 	}
 
-	public function validate($input) {
-		// All checkboxes inputs
-		$valid = array();
-
-		//ATB title
-		$valid['atb-title'] = (isset($input['atb-title']) && !empty($input['atb-title'])) ? 1 : 0;
-		//return 1;
-		return $valid;
-	}
-
-	public function options_update() {
-		register_setting($this->plugin_name, $this->plugin_name, array($this, 'validate'));
-	}
 
 	/**
 	 * Sets the class variable $options
 	 */
 	private function set_options() {
-
 		$this->options = get_option( $this->plugin_name . '-options' );
-
 	} // set_options()
 
 	/**
@@ -277,13 +262,11 @@ class Add_to_basket_Admin {
 	public function register_settings() {
 
 		// register_setting( $option_group, $option_name, $sanitize_callback );
-
 		register_setting(
 			$this->plugin_name . '-options',
 			$this->plugin_name . '-options',
 			array( $this, 'validate_options' )
 		);
-
 	} // register_settings()
 
 

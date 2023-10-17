@@ -33,15 +33,11 @@ class Add_to_basket_i18n {
 	 * @since    1.0.0
 	 */
 	public function load_plugin_textdomain() {
-
 		load_plugin_textdomain(
-			'add_to_basket',
+			'add2basket',
 			false,
 			dirname( dirname( plugin_basename( __FILE__ ) ) ) . '/languages/'
 		);
-
 	}
-
-
 
 }
