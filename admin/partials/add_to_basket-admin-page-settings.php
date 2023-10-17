@@ -5,7 +5,7 @@
  *
  * This file is used to markup the admin-facing aspects of the plugin.
  *
- * @link       http://slushman.com
+ * @link       https://marshallfungai.github.io
  * @since      1.0.0
  *
  * @package    Add To Basket

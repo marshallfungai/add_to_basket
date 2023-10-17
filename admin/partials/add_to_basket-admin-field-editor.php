@@ -3,7 +3,7 @@
 /**
  * Provides the markup for any WP Editor field
  *
- * @link       http://slushman.com
+ * @link       https://marshallfungai.github.io
  * @since      1.0.0
  *
  * @package    add_to_basket
