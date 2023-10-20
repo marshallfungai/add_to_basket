@@ -23,6 +23,6 @@ if($options['listing-title-header-status']){
 
 echo '<ul>';
 foreach ( $items as $item ) {
-	echo('<li><b>' . $item->post_title . ' --- | --- </b>' . $item->post_content . '</li>');
+	echo('<li><button><b>' . $item->post_title . ' | ' . $item->post_content . '</button></li>');
 } // foreach
 echo ('</ul>');

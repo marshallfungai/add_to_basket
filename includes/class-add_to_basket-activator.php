@@ -22,6 +22,7 @@
  */
 class Add_to_basket_Activator {
 
+
 	/**
 	 * Short Description. (use period)
 	 *

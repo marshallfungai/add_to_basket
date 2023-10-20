@@ -130,7 +130,7 @@ class Add_to_basket_Admin {
 		$opts['show_in_admin_bar'] = TRUE;
 		$opts['show_in_menu'] = TRUE;
 		$opts['show_in_nav_menu'] = TRUE;
-		$opts['supports'] =  array('title', 'excerpt', 'thumbnail', 'author', 'page-attributes', 'custom-fields');
+		$opts['supports'] =  array('title', 'thumbnail', 'author', 'editor');
 
 
 		$opts['labels']['add_new'] = esc_html__( "Add New {$single}", 'add2basket' );

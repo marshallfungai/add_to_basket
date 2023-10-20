@@ -66,6 +66,15 @@ class Add_to_basket {
 	 */
 	private $sanitizer;
 
+	/**
+	 * Keeps track of client validity through client key
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      boolean    $clientValid    client key status
+	 */
+	protected $clientValid;
+
 
 
 	/**
@@ -89,6 +98,9 @@ class Add_to_basket {
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
+		$this->define_metabox_hooks();
+		$this->checkClientKey();
+
 
 	}
 
@@ -132,6 +144,11 @@ class Add_to_basket {
 		 * side of the site.
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-add_to_basket-public.php';
+
+		/**
+		 * The class responsible for defining all actions relating to metaboxes.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-add_to_basket-admin-metaboxes.php';
 
 		/**
 		 * The class responsible for sanitizing user input
@@ -179,15 +196,14 @@ class Add_to_basket {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 		$this->loader->add_action( 'init', $plugin_admin, 'fn_add_to_basket_admin' );
-		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_plugin_admin_menu' ); // Add menu item
+		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_plugin_admin_menu' ); // Add menu page
 
         // Add Settings link to the plugin
 		$plugin_basename = plugin_basename( plugin_dir_path( __DIR__ ) . $this->plugin_name . '.php' );
 		$this->loader->add_filter( 'plugin_action_links_' . $plugin_basename, $plugin_admin, 'add_action_links' );
+
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_menu' );
-		//$this->loader->add_action('admin_init', $plugin_admin, 'options_update');
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_sections' );
-		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_settings' );
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_fields' );
 	}
 
@@ -204,9 +220,41 @@ class Add_to_basket {
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 		$this->loader->add_action( 'init', $plugin_public, 'register_shortcodes' );
 
+	}
+
+	/**
+	 * Register all of the hooks related to metaboxes
+	 *
+	 * @since 		1.0.0
+	 * @access 		private
+	 */
+	private function define_metabox_hooks() {
+
+		$plugin_metaboxes = new Add_to_basket_Metaboxes( $this->get_plugin_name(), $this->get_version() );
+
+		$this->loader->add_action( 'add_meta_boxes', $plugin_metaboxes, 'add_metaboxes' );
+		$this->loader->add_action( 'add_meta_boxes_job', $plugin_metaboxes, 'set_meta' );
+		$this->loader->add_action( 'save_post_job', $plugin_metaboxes, 'validate_meta', 10, 2 );
+
+	} // define_metabox_hooks()
+
+	/**
+	 *  Check if client key is valid.
+	 *
+	 * @since     1.0.0
+	 *
+	 */
+	protected function checkClientKey() {
+		$options = get_option($this->plugin_name.'-options');
+		if(isset($options['client-key'])){
+			//define('A2B_ACTIVE', true);
+			$this->clientValid = true;
+			return true;
+		}
+		//define('A2B_ACTIVE', false);
+		$this->clientValid = false;
 	}
 
 	/**
@@ -248,5 +296,6 @@ class Add_to_basket {
 	public function get_version() {
 		return $this->version;
 	}
+
 
 }
