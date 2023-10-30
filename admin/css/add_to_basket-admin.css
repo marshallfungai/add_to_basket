@@ -2,3 +2,26 @@
  * All of the CSS for your admin-specific functionality should be
  * included in this file.
  */
+
+.bold {
+  font-weight: bold;
+}
+
+
+/**
+ * START : Admin metaboxes section
+ */
+
+.a2b-admin-metaboxes  {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid rgba(248, 249, 250, 0.55);
+}
+
+.a2b-admin-metaboxes .desc {
+ font-size: 11px;
+}
+
+/**
+ * END : Admin metaboxes section
+ */

@@ -41,6 +41,16 @@ class Add_to_basket_Admin {
 	private $version;
 
 	/**
+	 * The random integer id.
+	 *
+	 * @since        1.0.0
+	 * @access       private
+	 * @desc         integer id hedge against cache in dev mode.
+	 * @var          integer    $randID   unique id .
+	 */
+	private $randID;
+
+	/**
 	 * Initialize the class and set its properties.
 	 *
 	 * @since    1.0.0
@@ -51,6 +61,7 @@ class Add_to_basket_Admin {
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
+		$this->randID = uniqid();
 		$this->set_options();
 
 	}
@@ -74,7 +85,12 @@ class Add_to_basket_Admin {
 		 * class.
 		 */
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/add_to_basket-admin.css', array(), $this->version, 'all' );
+		$cacheBuster = $this->version;
+		if(defined('WP_DEBUG') && WP_DEBUG){
+			$cacheBuster = $this->randID;
+		}
+
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/add_to_basket-admin.css', array(), $cacheBuster , 'all' );
 
 	}
 
@@ -97,7 +113,11 @@ class Add_to_basket_Admin {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/add_to_basket-admin.js', array( 'jquery' ), $this->version, false );
+		$cacheBuster = $this->version;
+		if(defined('WP_DEBUG') && WP_DEBUG){
+			$cacheBuster = $this->randID;
+		}
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/add_to_basket-admin.js', array( 'jquery' ), $cacheBuster, false );
 
 	}
 
@@ -130,8 +150,7 @@ class Add_to_basket_Admin {
 		$opts['show_in_admin_bar'] = TRUE;
 		$opts['show_in_menu'] = TRUE;
 		$opts['show_in_nav_menu'] = TRUE;
-		$opts['supports'] =  array('title', 'thumbnail', 'author', 'editor');
-
+		$opts['supports'] =  array('title', 'thumbnail', 'author');
 
 		$opts['labels']['add_new'] = esc_html__( "Add New {$single}", 'add2basket' );
 		$opts['labels']['add_new_item'] = esc_html__( "Add New {$single}", 'add2basket' );

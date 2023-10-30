@@ -21,7 +21,7 @@
  * Author URI:        https://marshallfungai.github.io/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
- * Text Domain:       add_to_basket
+ * Text Domain:       add2basket
  * Domain Path:       /languages
  */
 
