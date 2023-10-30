@@ -208,14 +208,7 @@ class Add_to_basket_Metaboxes
 
 		}
 
-		global $post;
- 		//$f = get_post_meta();
- 		//print_r($params['args']);
-		//$letsee = get_post_custom($post->ID);
-		//$meta_value =  get_post_meta($post->ID, 'a2b_metabox_product_btn_label', true);
-     	//print_r('$meta_value');
-    	//print_r($post);
-		include(plugin_dir_path(__FILE__) . 'partials/add_to_basket-admin-metabox-' . $params['args']['file'] . '.php');
+    	include(plugin_dir_path(__FILE__) . 'partials/add_to_basket-admin-metabox-' . $params['args']['file'] . '.php');
 
 	} // metabox()
 
