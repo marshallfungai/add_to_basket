@@ -220,16 +220,6 @@ class Add_to_basket_Admin {
 	 */
 	public function register_sections() {
 
-		// add_settings_section( $id, $title, $callback, $menu_slug );
-
-//		add_settings_section(
-//			$this->plugin_name . '-messages',
-//			apply_filters( $this->plugin_name . 'section-title-messages', esc_html__( 'Messages', 'add2basket' ) ),
-//			array( $this, 'section_messages' ),
-//			$this->plugin_name
-//		);
-
-
 		add_settings_section(
 			$this->plugin_name . '-configs',
 			apply_filters( $this->plugin_name . 'section-configs', esc_html__( 'Configs', 'add2basket' ) ),
@@ -252,6 +242,7 @@ class Add_to_basket_Admin {
 		return array_merge( $settings_link, $links );
 	}
 
+	
 	/**
 	 * Render the settings page for this plugin.
 	 *
@@ -260,8 +251,8 @@ class Add_to_basket_Admin {
 
 	public function display_plugin_setup_page() {
 		//	include_once( 'partials/add_to_basket-admin-display.php' );
-			include_once('partials/add_to_basket-admin-page-settings.php');
-		//include( plugin_dir_path( __FILE__ ) . 'partials/add_to_basket-admin-page-settings.php' );
+		//	include_once('partials/add_to_basket-admin-page-settings.php');
+		include( plugin_dir_path( __FILE__ ) . 'partials/add_to_basket-admin-page-settings.php' );
 	}
 
 
@@ -271,22 +262,6 @@ class Add_to_basket_Admin {
 	private function set_options() {
 		$this->options = get_option( $this->plugin_name . '-options' );
 	} // set_options()
-
-	/**
-	 * Registers plugin settings
-	 *
-	 * @since 		1.0.0
-	 * @return 		void
-	 */
-	public function register_settings() {
-
-		// register_setting( $option_group, $option_name, $sanitize_callback );
-		register_setting(
-			$this->plugin_name . '-options',
-			$this->plugin_name . '-options',
-			array( $this, 'validate_options' )
-		);
-	} // register_settings()
 
 
 	/**
@@ -337,81 +312,33 @@ class Add_to_basket_Admin {
 		);
 
 
-//		add_settings_field(
-//			'how-to-apply',
-//			apply_filters( $this->plugin_name . 'label-how-to-apply', esc_html__( 'How to Apply', 'add2basket' ) ),
-//			array( $this, 'field_editor' ),
-//			$this->plugin_name,
-//			$this->plugin_name . '-messages',
-//			array(
-//				'description' 	=> 'Instructions for applying (contact email, phone, fax, address, etc).',
-//				'id' 			=> 'howtoapply'
-//			)
-//		);
-
-//		add_settings_field(
-//			'repeater-test',
-//			apply_filters( $this->plugin_name . 'label-repeater-test', esc_html__( 'Repeater Test', 'add2basket' ) ),
-//			array( $this, 'field_repeater' ),
-//			$this->plugin_name,
-//			$this->plugin_name . '-messages',
-//			array(
-//				'description' 	=> 'Instructions for applying (contact email, phone, fax, address, etc).',
-//				'fields' 		=> array(
-//					array(
-//						'text' => array(
-//							'class' 		=> '',
-//							'description' 	=> '',
-//							'id' 			=> 'test1',
-//							'label' 		=> '',
-//							'name' 			=> $this->plugin_name . '-options[test1]',
-//							'placeholder' 	=> 'Test 1',
-//							'type' 			=> 'text',
-//							'value' 		=> ''
-//						),
-//					),
-//					array(
-//						'text' => array(
-//							'class' 		=> '',
-//							'description' 	=> '',
-//							'id' 			=> 'test2',
-//							'label' 		=> '',
-//							'name' 			=> $this->plugin_name . '-options[test2]',
-//							'placeholder' 	=> 'Test 2',
-//							'type' 			=> 'text',
-//							'value' 		=> ''
-//						),
-//					),
-//					array(
-//						'text' => array(
-//							'class' 		=> '',
-//							'description' 	=> '',
-//							'id' 			=> 'test3',
-//							'label' 		=> '',
-//							'name' 			=> $this->plugin_name . '-options[test3]',
-//							'placeholder' 	=> 'Test 3',
-//							'type' 			=> 'text',
-//							'value' 		=> ''
-//						),
-//					),
-//				),
-//				'id' 			=> 'repeater-test',
-//				'label-add' 	=> 'Add Test',
-//				'label-edit' 	=> 'Edit Test',
-//				'label-header' 	=> 'TEST',
-//				'label-remove' 	=> 'Remove Test',
-//				'title-field' 	=> 'test1'
-//
-//			)
-//		);
-
 	} // register_fields()
 
 
-	private function sanitizer( $type, $data ) {
+		/**
+	 * Registers plugin settings
+	 *
+	 * @since 		1.0.0
+	 * @return 		void
+	 */
+	public function register_settings() {
+
+		// register_setting( $option_group, $option_name, $sanitize_callback );
+		register_setting(
+			$this->plugin_name . '-options',
+			$this->plugin_name . '-options',
+			array( $this, 'validate_options' )
+		);
+	} // register_settings()
+
+
+	private function sanitizer( $type, $unsanizited_data ) {
+		
 
 		if ( empty( $type ) ) { return; }
 		if ( empty( $data ) ) { return; }
+		//var_dump(static::class); exit;
+		//$data = $this->verify_settings_with_api($unsanizited_data);
 
 		$return 	= '';
 		$sanitizer 	= new Add_to_basket_Sanitize();
@@ -426,6 +353,37 @@ class Add_to_basket_Admin {
 		return $return;
 
 	} // sanitizer()
+
+	
+	/**
+	 *  Verifies the settings with an external API
+	 *
+	 * @since 		1.0.0
+	 * @param 		mixed 		$params 		iput that contains key for verificaion
+	 * @return 		mixed 						The settings section
+	 */
+
+	private function verify_settings_with_api($input) {
+        // Make your external API request here to verify the settings
+        // If the verification is successful, return the verified data
+        // If not, return false or an error message
+
+        // Example: Making a simple HTTP GET request using wp_remote_get
+        $api_url = 'https://api.example.com/verify-settings';
+        $response = wp_remote_get($api_url);
+
+        if (is_wp_error($response)) {
+            return false; // Verification failed
+        }
+
+        $body = wp_remote_retrieve_body($response);
+        $verified_data = json_decode($body, true);
+
+        // You can add additional verification logic based on the API response
+        // ...
+
+        return $verified_data; // Return verified data
+    }
 
 	/**
 	 * Creates a settings section
@@ -461,10 +419,7 @@ class Add_to_basket_Admin {
 	 * @return 		void
 	 */
 	public function page_help() {
-
-		include('partials/add_to_basket-admin-page-help.php');
-		//include( plugin_dir_path( __FILE__ ) . 'partials/add_to_basket-admin-page-help.php' );
-
+		include(plugin_dir_path( __FILE__ ) .'partials/add_to_basket-admin-page-help.php');
 	} // page_help()
 
 
@@ -475,10 +430,7 @@ class Add_to_basket_Admin {
 	 * @return 		void
 	 */
 	public function page_options() {
-
-		//include( plugin_dir_path( __FILE__ ) . 'partials/add_to_basket-admin-page-settings.php' );
-		include('partials/add_to_basket-admin-page-settings.php');
-
+		include( plugin_dir_path( __FILE__ ) . 'partials/add_to_basket-admin-page-settings.php' );
 	} // page_options()
 
 
@@ -494,10 +446,6 @@ class Add_to_basket_Admin {
 		$options[] = array( 'client-key', 'text', '' );
 		$options[] = array( 'listing-title-header-status', 'checkbox', 0 );
 		$options[] = array( 'listing-title-header', 'text', '' );
-
-		//$options[] = array( 'message-no-openings', 'text', 'Thank you for your interest! There are no job openings at this time.' );
-		//$options[] = array( 'howtoapply', 'editor', '' );
-		//$options[] = array( 'repeat-test', 'repeater', array( array( 'test1', 'text' ), array( 'test2', 'text' ), array( 'test3', 'text' ) ) );
 
 		return $options;
 
@@ -569,6 +517,8 @@ class Add_to_basket_Admin {
 				*/
 
 		}
+
+		
 
 		return $valid;
 

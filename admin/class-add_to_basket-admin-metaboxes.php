@@ -317,16 +317,10 @@ class Add_to_basket_Metaboxes
 		$metas = $this->get_metabox_fields();
 
 		foreach ($metas as $meta) {
-			//wp_debug_log('meta logging');
-			//wp_debug_log($meta[0]);
-			//wp_die(print_r($meta));
-			error_log('meta logging');
-			error_log($meta[0]);
-			error_log($meta[1]);
+
 			$name = $meta[0];
 			$type = $meta[1];
 			$new_value = $this->sanitizer($type, $_POST[$name]);
-			//wp_die($new_value);
 			update_post_meta($post_id, $name, $new_value);
 
 //			if ('repeater' === $type && is_array($meta[2])) {

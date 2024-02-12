@@ -23,13 +23,23 @@
 class Add_to_basket_Public {
 
 	/**
+	 * The plugin options.
+	 *
+	 * @since 		1.0.0
+	 * @access 		private
+	 * @var 		string 			$options    The plugin options.
+	 */
+	private $options;
+
+	/**
 	 * The ID of this plugin.
 	 *
-	 * @since    1.0.0
-	 * @access   private
-	 * @var      string    $plugin_name    The ID of this plugin.
+	 * @since 		1.0.0
+	 * @access 		private
+	 * @var 		string 			$plugin_name 		The ID of this plugin.
 	 */
 	private $plugin_name;
+
 
 	/**
 	 * The version of this plugin.
@@ -51,7 +61,7 @@ class Add_to_basket_Public {
 
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-
+		$this->set_options();
 	}
 
 	/**
@@ -107,8 +117,8 @@ class Add_to_basket_Public {
 	 */
 
 	public function register_shortcodes() {
-		add_shortcode( 'add2basket', array( $this, 'list_basket' ) );
-		//add_shortcode('Basket_item', 'display_add_to_bsket_content_shortcode');
+		add_shortcode( 'add2basket', array( $this, 'fn_list_basket' ) );
+		//add_shortcode('Basket_item', 'fn_display_add_to_basket_content_shortcode');
 	} // register_shortcodes()
 
 
@@ -120,27 +130,61 @@ class Add_to_basket_Public {
 	 *
 	 */
 
-	function display_add_to_bsket_content_shortcode() {
-		// Query and display custom post type content
-		$args = array(
-			'post_type' => $this->plugin_name,
-			'posts_per_page' => -1, // Display all posts
-		);
-		$query = new WP_Query($args);
+	// function fn_display_add_to_basket_content_shortcode() {
+	// 	// Query and display custom post type content
+	// 	$args = array(
+	// 		'post_type' => $this->plugin_name,
+	// 		'posts_per_page' => -1, // Display all posts
+	// 	);
+	// 	$query = new WP_Query($args);
 
-		if ($query->have_posts()) {
-			while ($query->have_posts()) {
-				$query->the_post();
-				// Display content here
-				the_title();
-				the_content();
-			}
-		} else {
-			echo 'No Basket Items found.';
+	// 	if ($query->have_posts()) {
+	// 		while ($query->have_posts()) {
+	// 			$query->the_post();
+	// 			// Display content here
+	// 			the_title();
+	// 			the_content();
+	// 		}
+	// 	} else {
+	// 		echo 'No Basket Items found.';
+	// 	}
+	// 	wp_reset_postdata();
+	// }
+
+	/**
+	 * Processes shortcode basketItems
+	 *
+	 * @param array $atts The attributes from the shortcode
+	 *
+	 *
+	 * @return mixed $output Output of the buffer
+	 */
+
+	 public function fn_list_basket( $atts = array() ) {
+		ob_start();
+		//print_r($atts);	exit;
+		if ( !isset($atts['num']) ) {
+			$atts['num'] = -1;
 		}
-		wp_reset_postdata();
-	}
-    //add_shortcode('custom_post_type_display', 'display_add_to_bsket_content_shortcode');
+		$args = shortcode_atts( array(
+			'num' => $atts['num'],
+			'title' => '',
+			),
+			$atts
+		);
+
+		$items = $this->get_basket_items($args['num']);
+		//$meta = $this->get_basket_item_meta();
+		//var_dump(json_encode($items));
+		if ( is_array( $items ) || is_object( $items ) ) {
+			include ('partials/add_to_basket-public-display.php');
+		} else {
+			echo $items;
+		}
+		$output = ob_get_contents();
+		ob_end_clean();
+		return $output;
+	} 
 
 
 	/**
@@ -171,40 +215,32 @@ class Add_to_basket_Public {
 		return $return;
 	} // get_basket_items()
 
-
-
 	/**
-	 * Processes shortcode basketItems
+	 * Returns a post meta value
 	 *
-	 * @param array $atts The attributes from the shortcode
+	 * @param array $params
 	 *
-	 *
-	 * @return mixed $output Output of the buffer
 	 */
 
-	public function list_basket( $atts = array() ) {
-		ob_start();
-
-		$args = shortcode_atts( array(
-			'num' => -1,
-			'title' => '',),
-			$atts
-		);
-
-		$items = $this->get_basket_items($args['num']);
-		//var_dump(json_encode($items));
-
-		if ( is_array( $items ) || is_object( $items ) ) {
-			include ('partials/add_to_basket-public-display.php');
-		} else {
-			echo $items;
+	public function get_basket_item_meta($post_id, $custom_field_name) {
+		
+		$custom_field_value = get_post_meta($post_id, $custom_field_name, true);
+		if (!empty($custom_field_value)) {
+			return esc_html($custom_field_value);
 		}
+		
+		return '';
+	} 
 
-		$output = ob_get_contents();
-		ob_end_clean();
+	
 
-		return $output;
+	/**
+	 * Sets the class variable $options
+	 */
+	private function set_options() {
 
-	} // get_basket_items()
+		$this->options = get_option( $this->plugin_name . '-options' );
+
+	} // set_options()
 
 }
