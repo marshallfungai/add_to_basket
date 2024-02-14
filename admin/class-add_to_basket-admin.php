@@ -129,371 +129,7 @@ class Add_to_basket_Admin {
 
 	}
 
-	/**
-	 * Creates a new custom post type
-	 *
-	 * @since 1.0.0
-	 * @access public
-	 * @uses register_post_type()
-	 */
-	public function fn_add_to_basket_admin() {
-		$cap_type = 'post';
-		$plural = 'A2B Item';
-		$single = 'A2B Items';
-		$cpt_name = $this->plugin_name;
-		$opts['can_export'] = TRUE;
-		$opts['capability_type'] = $cap_type;
-		$opts['description'] = '';
-		$opts['exclude_from_search'] = FALSE;
-		$opts['has_archive'] = FALSE;
-		$opts['hierarchical'] = FALSE;
-		$opts['map_meta_cap'] = TRUE;
-		$opts['menu_icon'] = 'dashicons-businessman';
-		$opts['menu_position'] = 25;
-		$opts['public'] = TRUE;
-		$opts['publicly_querable'] = TRUE;
-		$opts['query_var'] = TRUE;
-		$opts['register_meta_box_cb'] = '';
-		$opts['rewrite'] = FALSE;
-		$opts['show_in_admin_bar'] = TRUE;
-		$opts['show_in_menu'] = TRUE;
-		$opts['show_in_nav_menu'] = TRUE;
-		$opts['supports'] =  array('title', 'thumbnail', 'author');
-
-		$opts['labels']['add_new'] = esc_html__( "Add New {$single}", 'add2basket' );
-		$opts['labels']['add_new_item'] = esc_html__( "Add New {$single}", 'add2basket' );
-		$opts['labels']['all_items'] = esc_html__( $plural, 'add2basket' );
-		$opts['labels']['edit_item'] = esc_html__( "Edit {$single}" , 'add2basket' );
-		$opts['labels']['menu_name'] = esc_html__( $plural, 'add2basket' );
-		$opts['labels']['name'] = esc_html__( $plural, 'add2basket' );
-		$opts['labels']['name_admin_bar'] = esc_html__( $single, 'add2basket' );
-		$opts['labels']['new_item'] = esc_html__( "New {$single}", 'add2basket' );
-		$opts['labels']['not_found'] = esc_html__( "No {$plural} Found", 'add2basket' );
-		$opts['labels']['not_found_in_trash'] = esc_html__( "No {$plural} Found in Trash", 'add2basket' );
-		$opts['labels']['parent_item_colon'] = esc_html__( "Parent {$plural} :", 'add2basket' );
-		$opts['labels']['search_items'] = esc_html__( "Search {$plural}", 'add2basket' );
-		$opts['labels']['singular_name'] = esc_html__( $single, 'add2basket' );
-		$opts['labels']['view_item'] = esc_html__( "View {$single}", 'add2basket' );
-
-		register_post_type( strtolower( $cpt_name ), $opts );
-	} // new_cpt_job()
-
-	/**
-	 * Register the administration menu for this plugin into the WordPress Dashboard menu.
-	 *
-	 * @since 1.0.0
-	 */
-
-	/**
-	 * Adds a settings page link to a menu
-	 *
-	 * @link 		https://codex.wordpress.org/Administration_Menus
-	 * @since 		1.0.0
-	 * @return 		void
-	 */
-	public function add_admin_sub_menu() {
-
-
-		add_submenu_page(
-			'edit.php?post_type='.$this->plugin_name,
-			apply_filters( $this->plugin_name . '-settings-page-title', esc_html__( 'Add To Basket Settings', 'add2basket' ) ),
-			apply_filters( $this->plugin_name . '-settings-menu-title', esc_html__( 'Settings', 'add2basket' ) ),
-			'manage_options',
-			$this->plugin_name . '-settings',
-			array( $this, 'page_options' )
-		);
-
-		add_submenu_page(
-			'edit.php?post_type='.$this->plugin_name,
-			apply_filters( $this->plugin_name . '-settings-page-title', esc_html__( 'Add To Basket Help', 'add2basket' ) ),
-			apply_filters( $this->plugin_name . '-settings-menu-title', esc_html__( 'Help', 'add2basket' ) ),
-			'manage_options',
-			$this->plugin_name . '-help',
-			array( $this, 'page_help' )
-		);
-
-	} // add_menu()
-
-	public function add_plugin_admin_menu() {
-		add_options_page( 'ATB Options Settings', 'ATB Settings', 'manage_options', $this->plugin_name, array($this, 'display_plugin_setup_page'));
-	}
-
-	/**
-	 * Registers settings sections with WordPress
-	 */
-	public function register_sections() {
-
-		add_settings_section(
-			$this->plugin_name . '-options',
-			apply_filters( $this->plugin_name . 'section-configs', esc_html__( 'Configs', 'add2basket' ) ),
-			array( $this, 'section_configs' ),
-			$this->plugin_name . '-settings'
-		);
-
-	} // register_sections()
-
-	/**
-	 * Add settings action link to the plugins page.
-	 *
-	 * @since 1.0.0
-	 */
-
-	public function add_action_links( $links ) {
-		$settings_link = array(
-			'<a href="' . admin_url( 'options-general.php?page=' . $this->plugin_name ) . '">' . __('Settings', $this->plugin_name) . '</a>',
-		);
-		return array_merge( $settings_link, $links );
-	}
-
 	
-	/**
-	 * Render the settings page for this plugin.
-	 *
-	 * @since 1.0.0
-	 */
-
-	public function display_plugin_setup_page() {
-
-		include( plugin_dir_path( __FILE__ ) . 'partials/add_to_basket-admin-page-settings.php' );
-	}
-
-
-	/**
-	 * Sets the class variable $options
-	 */
-	private function set_options() {
-		$this->options = get_option( $this->plugin_name . '-options' );
-	} // set_options()
-
-
-	/**
-	 * Registers settings fields with WordPress
-	 */
-	public function register_fields() {
-
-		// add_settings_field( $id, $title, $callback, $menu_slug, $section, $args );
-
-		add_settings_field(
-			'client_key',
-			esc_html__( 'Client Key', 'add2basket' ),
-			array( $this, 'field_text' ),
-			$this->plugin_name . '-settings', //page
-			$this->plugin_name . '-options',  //section
-			array(
-				'label_for ' 	=> 'client_key',
-				'description' 	=> 'Key to connect to "Add to basket" account given after creating seller account.',
-				'id' 			=> 'client_key',
-				'class' 	=> 'form-control',
-				'placeholder' 	=> 'Enter client key',
-				// 'value' 		=> 'Enter client key',
-			)
-		);
-
-		add_settings_field(
-			'listing-title-header-status',
-			esc_html__( 'A2B Title status', 'add2basket' ),
-			array( $this, 'field_checkbox' ),
-			$this->plugin_name . '-settings',
-			$this->plugin_name . '-options',
-			array(
-				'label_for ' 	=> 'listing-title-header-status',
-				'description' 	=> 'Show/hide title on A2B listing page',
-				'id' 			=> 'listing-title-header-status',
-				'class' 	=> 'form-control',
-				'default' 		=> '0',
-				// 'value' 		=> 0,
-			)
-		);
-
-		add_settings_field(
-			'listing-title-header',
-			esc_html__( 'A2B Title', 'add2basket' ),
-			array( $this, 'field_text' ),
-			$this->plugin_name . '-settings',
-			$this->plugin_name . '-options',
-			array(
-				'label_for ' 	=> 'listing-title-header',
-				'description' 	=> 'Title for A2B listing page',
-				'id' 			=> 'listing-title-header',
-				'class' 	=> 'form-control',
-				'default' 		=> 'Instant Payment For You',
-				// 'value' 		=> esc_html__( 'Instant Payment For You', 'add2basket' ),
-			)
-		);
-
-
-	} // register_fields()
-
-
-		/**
-	 * Registers plugin settings
-	 *
-	 * @since 		1.0.0
-	 * @return 		void
-	 */
-	public function register_settings() {
-
-		// register_setting( $option_group, $option_name, $sanitize_callback );
-		register_setting(
-			$this->plugin_name . '-options',
-			$this->plugin_name . '-options',
-			array( $this, 'validate_options' )
-		);
-		// register_setting($this->plugin_name . '-options', 'client_key', array( $this, 'validate_options' ));
-		// register_setting($this->plugin_name . '-options', 'listing-title-header-status', array( $this, 'validate_options' ));
-		// register_setting($this->plugin_name . '-options', 'listing-title-header', array( $this, 'validate_options' ));
-	} // register_settings()
-
-
-	/**
-	 *  Verifies the settings with an external API
-	 *
-	 * @since 		1.0.0
-	 * @param 		mixed 		$params 		iput that contains key for verificaion
-	 * @return 		mixed 						The settings section
-	 */
-
-	private function verify_settings_with_api($input) {
-		//wp_die($input);
-
-		return $input;
-        // Make your external API request here to verify the settings
-        // If the verification is successful, return the verified data
-        // If not, return false or an error message
-
-        // Example: Making a simple HTTP GET request using wp_remote_get
-        $api_url = 'https://api.example.com/verify-settings';
-        $response = wp_remote_get($api_url);
-
-        if (is_wp_error($response)) {
-            return false; // Verification failed
-        }
-
-        $body = wp_remote_retrieve_body($response);
-        $verified_data = json_decode($body, true);
-
-        // You can add additional verification logic based on the API response
-        // ...
-
-        return $verified_data; // Return verified data
-    }
-
-
-	/**
-	 * Creates a settings section
-	 *
-	 * @since 		1.0.0
-	 * @param 		array 		$params 		Array of parameters for the section
-	 * @return 		mixed 						The settings section
-	 */
-	public function section_configs( $params ) {
-
-		include( plugin_dir_path( __FILE__ ) . 'partials/add_to_basket-admin-section-configs.php' );
-
-	} // section_configs()
-
-
-	/**
-	 * Creates the help page
-	 *
-	 * @since 		1.0.0
-	 * @return 		void
-	 */
-	public function page_help() {
-		include(plugin_dir_path( __FILE__ ) .'partials/add_to_basket-admin-page-help.php');
-	} // page_help()
-
-
-	/**
-	 * Creates the options page
-	 *
-	 * @since 		1.0.0
-	 * @return 		void
-	 */
-	public function page_options() {
-		include( plugin_dir_path( __FILE__ ) . 'partials/add_to_basket-admin-page-settings.php' );
-	} // page_options()
-
-
-	/**
-	 * Returns an array of options names, fields types, and default values
-	 *
-	 * @return 		array 			An array of options
-	 */
-	public static function get_options_list() {
-
-		$options = array();
-
-		$options[] = array( 'client_key', 'text', 'xxx' );
-		$options[] = array( 'listing-title-header-status', 'checkbox', 0 );
-		$options[] = array( 'listing-title-header', 'text', 'Instant Payments for you' );
-
-		return $options;
-
-	} // get_options_list()
-
-
-	public function validate_options( $input ) {
-
-
-		$valid 		= array();
-		$options 	= $this->get_options_list();
-		
-		foreach ( $options as $option ) {
-
-			$name = $option[0];
-			$type = $option[1];
-
-			$valid[$option[0]] = $this->sanitizer( $type, $input[$name] );
-
-			/*if ( ! isset( $input[$option[0]] ) ) { continue; }
-
-			$sanitizer 	= new Add_to_basket_Sanitize();
-
-			$sanitizer->set_data( $input[$option[0]] );
-			$sanitizer->set_type( $option[1] );
-
-			$valid[$option[0]] = $sanitizer->clean();
-
-			if ( $valid[$option[0]] != $input[$option[0]] ) {
-
-				add_settings_error( $option[0], $option[0] . '_error', esc_html__( $option[0] . ' error.', 'now-hiring' ), 'error' );
-
-			}
-
-			unset( $sanitizer );
-				*/
-
-		}
-
-		return $valid;
-
-	} // validate_options()
-
-	
-	private function sanitizer( $type, $unsanizited_data ) {
-
-		if ( empty( $type ) ) { return; }
-		if ( empty( $data ) ) { return; }
-		
-
-		$return 	= '';
-		$sanitizer 	= new Add_to_basket_Sanitize();
-
-		$sanitizer->set_data($data);
-		$sanitizer->set_type($type);
-
-		$return = $sanitizer->clean();
-
-		unset( $sanitizer );
-
-		return $return;
-
-	} // sanitizer()
-
-	
-
-
 	/**
 	 * Creates a text field
 	 *
@@ -509,8 +145,7 @@ class Add_to_basket_Admin {
 		$defaults['name'] 			= $this->plugin_name . '-options[' . $args['id'] . ']';
 		$defaults['placeholder'] 	= '';
 		$defaults['type'] 			= 'text';
-		//$option = get_option($args['id']);
-		//wp_die(get_option($args['id']));
+		
 		$defaults['value'] 			= '' ;
 
 		apply_filters( $this->plugin_name . '-field-text-options-defaults', $defaults );
@@ -727,6 +362,399 @@ class Add_to_basket_Admin {
 
 		include( plugin_dir_path( __FILE__ ) . 'partials/' . $this->plugin_name . '-admin-field-textarea.php' );
 
-	} // field_textarea()
+	} 
+
+	/**
+	 * Creates a new custom post type
+	 *
+	 * @since 1.0.0
+	 * @access public
+	 * @uses register_post_type()
+	 */
+	public function fn_add_to_basket_admin() {
+		$cap_type = 'post';
+		$plural = 'A2B Item';
+		$single = 'A2B Items';
+		$cpt_name = $this->plugin_name;
+		$opts['can_export'] = TRUE;
+		$opts['capability_type'] = $cap_type;
+		$opts['description'] = '';
+		$opts['exclude_from_search'] = FALSE;
+		$opts['has_archive'] = FALSE;
+		$opts['hierarchical'] = FALSE;
+		$opts['map_meta_cap'] = TRUE;
+		$opts['menu_icon'] = 'dashicons-businessman';
+		$opts['menu_position'] = 25;
+		$opts['public'] = TRUE;
+		$opts['publicly_querable'] = TRUE;
+		$opts['query_var'] = TRUE;
+		$opts['register_meta_box_cb'] = '';
+		$opts['rewrite'] = FALSE;
+		$opts['show_in_admin_bar'] = TRUE;
+		$opts['show_in_menu'] = TRUE;
+		$opts['show_in_nav_menu'] = TRUE;
+		$opts['supports'] =  array('title', 'thumbnail', 'author');
+
+		$opts['labels']['add_new'] = esc_html__( "Add New {$single}", 'add2basket' );
+		$opts['labels']['add_new_item'] = esc_html__( "Add New {$single}", 'add2basket' );
+		$opts['labels']['all_items'] = esc_html__( $plural, 'add2basket' );
+		$opts['labels']['edit_item'] = esc_html__( "Edit {$single}" , 'add2basket' );
+		$opts['labels']['menu_name'] = esc_html__( $plural, 'add2basket' );
+		$opts['labels']['name'] = esc_html__( $plural, 'add2basket' );
+		$opts['labels']['name_admin_bar'] = esc_html__( $single, 'add2basket' );
+		$opts['labels']['new_item'] = esc_html__( "New {$single}", 'add2basket' );
+		$opts['labels']['not_found'] = esc_html__( "No {$plural} Found", 'add2basket' );
+		$opts['labels']['not_found_in_trash'] = esc_html__( "No {$plural} Found in Trash", 'add2basket' );
+		$opts['labels']['parent_item_colon'] = esc_html__( "Parent {$plural} :", 'add2basket' );
+		$opts['labels']['search_items'] = esc_html__( "Search {$plural}", 'add2basket' );
+		$opts['labels']['singular_name'] = esc_html__( $single, 'add2basket' );
+		$opts['labels']['view_item'] = esc_html__( "View {$single}", 'add2basket' );
+
+		register_post_type( strtolower( $cpt_name ), $opts );
+	} // new_cpt_job()
+
+	/**
+	 * Register the administration menu for this plugin into the WordPress Dashboard menu.
+	 *
+	 * @since 1.0.0
+	 */
+
+	/**
+	 * Adds a settings page link to a menu
+	 *
+	 * @link 		https://codex.wordpress.org/Administration_Menus
+	 * @since 		1.0.0
+	 * @return 		void
+	 */
+	public function add_admin_sub_menu() {
+
+
+		add_submenu_page(
+			'edit.php?post_type='.$this->plugin_name,
+			apply_filters( $this->plugin_name . '-settings-page-title', esc_html__( 'Add To Basket Settings', 'add2basket' ) ),
+			apply_filters( $this->plugin_name . '-settings-menu-title', esc_html__( 'Settings', 'add2basket' ) ),
+			'manage_options',
+			$this->plugin_name . '-settings',
+			array( $this, 'page_options' )
+		);
+
+		add_submenu_page(
+			'edit.php?post_type='.$this->plugin_name,
+			apply_filters( $this->plugin_name . '-settings-page-title', esc_html__( 'Add To Basket Help', 'add2basket' ) ),
+			apply_filters( $this->plugin_name . '-settings-menu-title', esc_html__( 'Help', 'add2basket' ) ),
+			'manage_options',
+			$this->plugin_name . '-help',
+			array( $this, 'page_help' )
+		);
+
+	} // add_menu()
+
+	public function add_plugin_admin_menu() {
+		add_options_page( 'ATB Options Settings', 'ATB Settings', 'manage_options', $this->plugin_name, array($this, 'display_plugin_setup_page'));
+	}
+
+	
+
+	/**
+	 * Add settings action link to the plugins page.
+	 *
+	 * @since 1.0.0
+	 */
+
+	public function add_action_links( $links ) {
+		$settings_link = array(
+			'<a href="' . admin_url( 'options-general.php?page=' . $this->plugin_name ) . '">' . __('Settings', $this->plugin_name) . '</a>',
+		);
+		return array_merge( $settings_link, $links );
+	}
+
+	
+	/**
+	 * Render the settings page for this plugin.
+	 *
+	 * @since 1.0.0
+	 */
+
+	public function display_plugin_setup_page() {
+
+		include( plugin_dir_path( __FILE__ ) . 'partials/add_to_basket-admin-page-settings.php' );
+	}
+
+
+	/**
+	 * Sets the class variable $options
+	 */
+	private function set_options() {
+		$this->options = get_option( $this->plugin_name . '-options' );
+	} // set_options()
+
+
+	/**
+	 * Registers settings fields with WordPress
+	 */
+	public function register_fields() {
+
+		// add_settings_field( $id, $title, $callback, $menu_slug, $section, $args );
+
+		add_settings_field(
+			'client_key',
+			esc_html__( 'Client Key', 'add2basket' ),
+			array( $this, 'field_text' ),
+			$this->plugin_name , //page
+			$this->plugin_name . '-options',  //section
+			array(
+				'label_for ' 	=> 'client_key',
+				'description' 	=> 'Key to connect to "Add to basket" account given after creating seller account.',
+				'id' 			=> 'client_key',
+				'class' 	=> 'form-control',
+				'placeholder' 	=> 'Enter client key',
+				// 'value' 		=> 'Enter client key',
+			)
+		);
+
+		add_settings_field(
+			'listing-title-header-status',
+			esc_html__( 'A2B Title status', 'add2basket' ),
+			array( $this, 'field_checkbox' ),
+			$this->plugin_name ,
+			$this->plugin_name . '-options',
+			array(
+				'label_for ' 	=> 'listing-title-header-status',
+				'description' 	=> 'Show/hide title on A2B listing page',
+				'id' 			=> 'listing-title-header-status',
+				'class' 	=> 'form-control',
+				'default' 		=> '0',
+				// 'value' 		=> 0,
+			)
+		);
+
+		add_settings_field(
+			'listing-title-header',
+			esc_html__( 'A2B Title', 'add2basket' ),
+			array( $this, 'field_text' ),
+			$this->plugin_name ,
+			$this->plugin_name . '-options',
+			array(
+				'label_for ' 	=> 'listing-title-header',
+				'description' 	=> 'Title for A2B listing page',
+				'id' 			=> 'listing-title-header',
+				'class' 	    => 'form-control',
+				'default' 		=> 'Instant Payment For You',
+				// 'value' 		=> esc_html__( 'Instant Payment For You', 'add2basket' ),
+			)
+		);
+
+
+	} // register_fields()
+
+	/**
+	 * Registers settings sections with WordPress
+	 */
+	public function register_sections() {
+
+		add_settings_section(
+			$this->plugin_name . '-options',
+			apply_filters( $this->plugin_name . 'section-configs', esc_html__( 'Configs', 'add2basket' ) ),
+			array( $this, 'section_configs' ),
+			$this->plugin_name 
+		);
+
+	} // register_sections()
+
+		/**
+	 * Registers plugin settings
+	 *
+	 * @since 		1.0.0
+	 * @return 		void
+	 */
+	public function register_settings() {
+
+		// register_setting( $option_group, $option_name, $sanitize_callback );
+		register_setting(
+			$this->plugin_name . '-options',
+			$this->plugin_name . '-options',
+			array( $this, 'validate_options' )
+		);
+
+	} // register_settings()
+
+
+	/**
+	 *  Verifies the settings with an external API
+	 *
+	 * @since 		1.0.0
+	 * @param 		mixed 		$params 		iput that contains key for verificaion
+	 * @return 		mixed 						The settings section
+	 */
+
+	private function verify_settings_with_api($input) {
+	
+		
+        // Make your external API request here to verify the settings
+        // If the verification is successful, return the verified data
+        // If not, return false or an error message
+		$data = array('client_key' => $input);
+        $args = array(
+			'body' => $data,
+		);
+        $api_url = 'https://api.addtobasket.net/ws/wp/set_login';
+        $response = wp_remote_post($api_url, $args);
+
+        if (is_wp_error($response)) {
+            return false; // Verification failed
+        }
+
+        $body = wp_remote_retrieve_body($response);
+        $verified_data = json_decode($body, true);
+
+		//wp_die(print_r($verified_data));
+
+        // You can add additional verification logic based on the API response
+        // ...
+
+        return $input; // Return verified data
+    }
+
+
+	/**
+	 * Creates a settings section
+	 *
+	 * @since 		1.0.0
+	 * @param 		array 		$params 		Array of parameters for the section
+	 * @return 		mixed 						The settings section
+	 */
+	public function section_configs( $params ) {
+
+		include( plugin_dir_path( __FILE__ ) . 'partials/add_to_basket-admin-section-configs.php' );
+
+	} // section_configs()
+
+
+	/**
+	 * Creates the help page
+	 *
+	 * @since 		1.0.0
+	 * @return 		void
+	 */
+	public function page_help() {
+		include(plugin_dir_path( __FILE__ ) .'partials/add_to_basket-admin-page-help.php');
+	} // page_help()
+
+
+	/**
+	 * Creates the options page
+	 *
+	 * @since 		1.0.0
+	 * @return 		void
+	 */
+	public function page_options() {
+		include( plugin_dir_path( __FILE__ ) . 'partials/add_to_basket-admin-page-settings.php' );
+	} // page_options()
+
+
+	/**
+	 * Returns an array of options names, fields types, and default values
+	 *
+	 * @return 		array 			An array of options
+	 */
+	public static function get_options_list() {
+
+		$options = array();
+
+		$options[] = array( 'client_key', 'text', 'xxx' );
+		$options[] = array( 'listing-title-header-status', 'checkbox', 0 );
+		$options[] = array( 'listing-title-header', 'text', 'Instant Payments for you' );
+
+		return $options;
+
+	} // get_options_list()
+
+
+	public function validate_options( $input ) {
+
+		 // Validate and sanitize each individual option in the array
+		// $input['client_key'] = sanitize_text_field($input['client_key']);
+		$input['listing-title-header-status'] = intval($input['listing-title-header-status']);
+		$input['listing-title-header'] = sanitize_text_field($input['listing-title-header']);
+
+		$verified_data = $this->verify_settings_with_api(sanitize_text_field($input['client_key']));
+
+        if ($verified_data !== false) {
+            // If verification is successful, update the client_key with the verified data
+            $input['client_key'] = $verified_data;
+        } else {
+            // If verification fails, display an error message
+            add_settings_error(
+                'client_key',
+                'client_key_verification_failed',
+                'Client Key verification failed. Please enter a valid key.',
+                'error'
+            );
+        }
+
+		
+		  // Add more validations as needed
+  
+		return $input;
+
+
+		// $valid 		= array();
+		// $options 	= $this->get_options_list();
+		
+		// foreach ( $options as $option ) {
+
+		// 	$name = $option[0];
+		// 	$type = $option[1];
+
+		// 	$valid[$option[0]] = $this->sanitizer( $type, $input[$name] );
+
+		// 	/*if ( ! isset( $input[$option[0]] ) ) { continue; }
+
+		// 	$sanitizer 	= new Add_to_basket_Sanitize();
+
+		// 	$sanitizer->set_data( $input[$option[0]] );
+		// 	$sanitizer->set_type( $option[1] );
+
+		// 	$valid[$option[0]] = $sanitizer->clean();
+
+		// 	if ( $valid[$option[0]] != $input[$option[0]] ) {
+
+		// 		add_settings_error( $option[0], $option[0] . '_error', esc_html__( $option[0] . ' error.', 'now-hiring' ), 'error' );
+
+		// 	}
+
+		// 	unset( $sanitizer );
+		// 		*/
+
+		// }
+
+		// return $valid;
+
+	} // validate_options()
+
+	
+	private function sanitizer( $type, $unsanizited_data ) {
+
+		if ( empty( $type ) ) { return; }
+		if ( empty( $data ) ) { return; }
+		
+
+		$return 	= '';
+		$sanitizer 	= new Add_to_basket_Sanitize();
+
+		$sanitizer->set_data($data);
+		$sanitizer->set_type($type);
+
+		$return = $sanitizer->clean();
+
+		unset( $sanitizer );
+
+		return $return;
+
+	} // sanitizer()
+
+	
+
+// field_textarea()
 
 }

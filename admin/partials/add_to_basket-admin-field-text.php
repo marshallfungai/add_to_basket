@@ -17,19 +17,12 @@ if ( ! empty( $atts['label'] ) ) {
 }
 
 
-// $options2 = get_option($this->plugin_name . '-options', );
-// if($options2[$atts['id']]){
-// 	$value = $options2[$atts['id']];
-// }
-
-//print_r( get_option($this->plugin_name)); exit;
-
 ?>
 
 <input
 	class="<?php echo esc_attr( $atts['class'] ); ?>"
 	id="<?php echo esc_attr( $atts['id'] ); ?>"
-	name="<?php echo esc_attr( $atts['id'] ); ?>"
+	name="<?php echo esc_attr( $atts['name'] ); ?>"
 	placeholder="<?php echo esc_attr( $atts['placeholder'] ); ?>"
 	type="<?php echo esc_attr( $atts['type'] ); ?>"
 	value="<?php echo esc_attr( $atts['value']  );  ?>" />
