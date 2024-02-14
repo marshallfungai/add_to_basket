@@ -16,7 +16,7 @@
  * Plugin Name:       Add To Basket : Instant Payments
  * Plugin URI:        https://addtobasket.net/
  * Description:       Instant payment solution for you.
- * Version:           1.0.0
+ * Version:           2.0.0
  * Author:            Fungai Marshall, Gunes Erdemi
  * Author URI:        https://marshallfungai.github.io/
  * License:           GPL-2.0+
@@ -42,12 +42,15 @@ define('A2B_ACTIVE', false);
  */
 define( 'ADD_TO_BASKET_VERSION', '1.0.0' );
 
+define( 'ADD_TO_BASKET_PATH', plugin_dir_path( __FILE__ ) );
+
+
 /**
  * The code that runs during plugin activation.
  * This action is documented in includes/class-add_to_basket-activator.php
  */
 function activate_add_to_basket() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-add_to_basket-activator.php';
+	require_once ADD_TO_BASKET_PATH . 'includes/class-add_to_basket-activator.php';
 	Add_to_basket_Activator::activate();
 }
 
@@ -56,7 +59,7 @@ function activate_add_to_basket() {
  * This action is documented in includes/class-add_to_basket-deactivator.php
  */
 function deactivate_add_to_basket() {
-	require_once plugin_dir_path( __FILE__ ) . 'includes/class-add_to_basket-deactivator.php';
+	require_once ADD_TO_BASKET_PATH . 'includes/class-add_to_basket-deactivator.php';
 	Add_to_basket_Deactivator::deactivate();
 }
 

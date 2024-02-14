@@ -188,13 +188,13 @@ class Add_to_basket_Sanitize {
 
 		if ( empty( $type ) ) {
 
-			$check = new WP_Error( 'forgot_type', __( 'Specify the data type to sanitize.', 'now-hiring' ) );
+			$check = new WP_Error( 'forgot_type', __( 'Specify the data type to sanitize.', 'add2basket' ) );
 
 		}
 
 		if ( is_wp_error( $check ) ) {
 
-			wp_die( $check->get_error_message(), __( 'Forgot data type', 'now-hiring' ) );
+			wp_die( $check->get_error_message(), __( 'Forgot data type', 'add2basket' ) );
 
 		}
 

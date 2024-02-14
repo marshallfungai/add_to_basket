@@ -23,6 +23,15 @@
 class Add_to_basket_Admin {
 
 	/**
+	 * The plugin options.
+	 *
+	 * @since 		1.0.0
+	 * @access 		private
+	 * @var 		string 			$options    The plugin options.
+	 */
+	private $options;
+
+	/**
 	 * The ID of this plugin.
 	 *
 	 * @since    1.0.0
@@ -63,7 +72,6 @@ class Add_to_basket_Admin {
 		$this->version = $version;
 		$this->randID = uniqid();
 		$this->set_options();
-
 	}
 
 	/**
@@ -183,13 +191,8 @@ class Add_to_basket_Admin {
 	 * @since 		1.0.0
 	 * @return 		void
 	 */
-	public function add_menu() {
+	public function add_admin_sub_menu() {
 
-		// Top-level page
-		// add_menu_page( $page_title, $menu_title, $capability, $menu_slug, $function, $icon_url, $position );
-
-		// Submenu Page
-		// add_submenu_page( $parent_slug, $page_title, $menu_title, $capability, $menu_slug, $function);
 
 		add_submenu_page(
 			'edit.php?post_type='.$this->plugin_name,
@@ -221,10 +224,10 @@ class Add_to_basket_Admin {
 	public function register_sections() {
 
 		add_settings_section(
-			$this->plugin_name . '-configs',
+			$this->plugin_name . '-options',
 			apply_filters( $this->plugin_name . 'section-configs', esc_html__( 'Configs', 'add2basket' ) ),
 			array( $this, 'section_configs' ),
-			$this->plugin_name
+			$this->plugin_name . '-settings'
 		);
 
 	} // register_sections()
@@ -250,8 +253,7 @@ class Add_to_basket_Admin {
 	 */
 
 	public function display_plugin_setup_page() {
-		//	include_once( 'partials/add_to_basket-admin-display.php' );
-		//	include_once('partials/add_to_basket-admin-page-settings.php');
+
 		include( plugin_dir_path( __FILE__ ) . 'partials/add_to_basket-admin-page-settings.php' );
 	}
 
@@ -271,43 +273,51 @@ class Add_to_basket_Admin {
 
 		// add_settings_field( $id, $title, $callback, $menu_slug, $section, $args );
 
-
 		add_settings_field(
-			'client-key',
-			apply_filters( $this->plugin_name . 'label-client-key', esc_html__( 'Client Key', 'add2basket' ) ),
+			'client_key',
+			esc_html__( 'Client Key', 'add2basket' ),
 			array( $this, 'field_text' ),
-			$this->plugin_name,
-			$this->plugin_name . '-configs',
+			$this->plugin_name . '-settings', //page
+			$this->plugin_name . '-options',  //section
 			array(
+				'label_for ' 	=> 'client_key',
 				'description' 	=> 'Key to connect to "Add to basket" account given after creating seller account.',
-				'id' 			=> 'client-key',
-				'value' 		=> 'Enter client key',
+				'id' 			=> 'client_key',
+				'class' 	=> 'form-control',
+				'placeholder' 	=> 'Enter client key',
+				// 'value' 		=> 'Enter client key',
 			)
 		);
 
 		add_settings_field(
 			'listing-title-header-status',
-			apply_filters( $this->plugin_name . 'label-listing-title-header-status', esc_html__( 'A2B Title status', 'add2basket' ) ),
+			esc_html__( 'A2B Title status', 'add2basket' ),
 			array( $this, 'field_checkbox' ),
-			$this->plugin_name,
-			$this->plugin_name . '-configs',
+			$this->plugin_name . '-settings',
+			$this->plugin_name . '-options',
 			array(
+				'label_for ' 	=> 'listing-title-header-status',
 				'description' 	=> 'Show/hide title on A2B listing page',
 				'id' 			=> 'listing-title-header-status',
-				'value' 		=> 0,
+				'class' 	=> 'form-control',
+				'default' 		=> '0',
+				// 'value' 		=> 0,
 			)
 		);
 
 		add_settings_field(
 			'listing-title-header',
-			apply_filters( $this->plugin_name . 'label-listing-title-header', esc_html__( 'A2B Title', 'add2basket' ) ),
+			esc_html__( 'A2B Title', 'add2basket' ),
 			array( $this, 'field_text' ),
-			$this->plugin_name,
-			$this->plugin_name . '-configs',
+			$this->plugin_name . '-settings',
+			$this->plugin_name . '-options',
 			array(
+				'label_for ' 	=> 'listing-title-header',
 				'description' 	=> 'Title for A2B listing page',
 				'id' 			=> 'listing-title-header',
-				'value' 		=> esc_html__( 'Instant Payment For You', 'add2basket' ),
+				'class' 	=> 'form-control',
+				'default' 		=> 'Instant Payment For You',
+				// 'value' 		=> esc_html__( 'Instant Payment For You', 'add2basket' ),
 			)
 		);
 
@@ -329,32 +339,12 @@ class Add_to_basket_Admin {
 			$this->plugin_name . '-options',
 			array( $this, 'validate_options' )
 		);
+		// register_setting($this->plugin_name . '-options', 'client_key', array( $this, 'validate_options' ));
+		// register_setting($this->plugin_name . '-options', 'listing-title-header-status', array( $this, 'validate_options' ));
+		// register_setting($this->plugin_name . '-options', 'listing-title-header', array( $this, 'validate_options' ));
 	} // register_settings()
 
 
-	private function sanitizer( $type, $unsanizited_data ) {
-		
-
-		if ( empty( $type ) ) { return; }
-		if ( empty( $data ) ) { return; }
-		//var_dump(static::class); exit;
-		//$data = $this->verify_settings_with_api($unsanizited_data);
-
-		$return 	= '';
-		$sanitizer 	= new Add_to_basket_Sanitize();
-
-		$sanitizer->set_data($data);
-		$sanitizer->set_type($type);
-
-		$return = $sanitizer->clean();
-
-		unset( $sanitizer );
-
-		return $return;
-
-	} // sanitizer()
-
-	
 	/**
 	 *  Verifies the settings with an external API
 	 *
@@ -364,6 +354,9 @@ class Add_to_basket_Admin {
 	 */
 
 	private function verify_settings_with_api($input) {
+		//wp_die($input);
+
+		return $input;
         // Make your external API request here to verify the settings
         // If the verification is successful, return the verified data
         // If not, return false or an error message
@@ -385,18 +378,6 @@ class Add_to_basket_Admin {
         return $verified_data; // Return verified data
     }
 
-	/**
-	 * Creates a settings section
-	 *
-	 * @since 		1.0.0
-	 * @param 		array 		$params 		Array of parameters for the section
-	 * @return 		mixed 						The settings section
-	 */
-	public function section_messages( $params ) {
-
-		include( plugin_dir_path( __FILE__ ) . 'partials/add_to_basket-admin-section-messages.php' );
-
-	} // section_messages()
 
 	/**
 	 * Creates a settings section
@@ -443,9 +424,9 @@ class Add_to_basket_Admin {
 
 		$options = array();
 
-		$options[] = array( 'client-key', 'text', '' );
+		$options[] = array( 'client_key', 'text', 'xxx' );
 		$options[] = array( 'listing-title-header-status', 'checkbox', 0 );
-		$options[] = array( 'listing-title-header', 'text', '' );
+		$options[] = array( 'listing-title-header', 'text', 'Instant Payments for you' );
 
 		return $options;
 
@@ -454,53 +435,20 @@ class Add_to_basket_Admin {
 
 	public function validate_options( $input ) {
 
-		//wp_die( print_r( $input ) );
 
 		$valid 		= array();
 		$options 	= $this->get_options_list();
-
+		
 		foreach ( $options as $option ) {
 
 			$name = $option[0];
 			$type = $option[1];
 
-			if ( 'repeater' === $type && is_array( $option[2] ) ) {
-
-				$clean = array();
-
-				foreach ( $option[2] as $field ) {
-
-					foreach ( $input[$field[0]] as $data ) {
-
-						if ( empty( $data ) ) { continue; }
-
-						$clean[$field[0]][] = $this->sanitizer( $field[1], $data );
-
-					} // foreach
-
-				} // foreach
-
-				$count = a2b_get_max( $clean );
-
-				for ( $i = 0; $i < $count; $i++ ) {
-
-					foreach ( $clean as $field_name => $field ) {
-
-						$valid[$option[0]][$i][$field_name] = $field[$i];
-
-					} // foreach $clean
-
-				} // for
-
-			} else {
-
-				$valid[$option[0]] = $this->sanitizer( $type, $input[$name] );
-
-			}
+			$valid[$option[0]] = $this->sanitizer( $type, $input[$name] );
 
 			/*if ( ! isset( $input[$option[0]] ) ) { continue; }
 
-			$sanitizer = new Now_Hiring_Sanitize();
+			$sanitizer 	= new Add_to_basket_Sanitize();
 
 			$sanitizer->set_data( $input[$option[0]] );
 			$sanitizer->set_type( $option[1] );
@@ -518,11 +466,32 @@ class Add_to_basket_Admin {
 
 		}
 
-		
-
 		return $valid;
 
 	} // validate_options()
+
+	
+	private function sanitizer( $type, $unsanizited_data ) {
+
+		if ( empty( $type ) ) { return; }
+		if ( empty( $data ) ) { return; }
+		
+
+		$return 	= '';
+		$sanitizer 	= new Add_to_basket_Sanitize();
+
+		$sanitizer->set_data($data);
+		$sanitizer->set_type($type);
+
+		$return = $sanitizer->clean();
+
+		unset( $sanitizer );
+
+		return $return;
+
+	} // sanitizer()
+
+	
 
 
 	/**
@@ -531,15 +500,18 @@ class Add_to_basket_Admin {
 	 * @param 	array 		$args 			The arguments for the field
 	 * @return 	string 						The HTML field
 	 */
-	public function field_text( $args ) {
-
+	public function field_text( $args ) { 
+		
+		
 		$defaults['class'] 			= 'text widefat';
 		$defaults['description'] 	= '';
 		$defaults['label'] 			= '';
 		$defaults['name'] 			= $this->plugin_name . '-options[' . $args['id'] . ']';
 		$defaults['placeholder'] 	= '';
 		$defaults['type'] 			= 'text';
-		$defaults['value'] 			= '';
+		//$option = get_option($args['id']);
+		//wp_die(get_option($args['id']));
+		$defaults['value'] 			= '' ;
 
 		apply_filters( $this->plugin_name . '-field-text-options-defaults', $defaults );
 
@@ -548,7 +520,7 @@ class Add_to_basket_Admin {
 		if ( ! empty( $this->options[$atts['id']] ) ) {
 
 			$atts['value'] = $this->options[$atts['id']];
-
+			
 		}
 
 		include( plugin_dir_path( __FILE__ ) . 'partials/' . $this->plugin_name . '-admin-field-text.php' );
@@ -599,7 +571,7 @@ class Add_to_basket_Admin {
 		$defaults['settings'] 		= array( 'textarea_name' => $this->plugin_name . '-options[' . $args['id'] . ']' );
 		$defaults['value'] 			= '';
 
-		apply_filters( $this->plugin_name . '-field-editor-options-defaults', $defaults );
+		//apply_filters( $this->plugin_name . '-field-editor-options-defaults', $defaults );
 
 		$atts = wp_parse_args( $args, $defaults );
 

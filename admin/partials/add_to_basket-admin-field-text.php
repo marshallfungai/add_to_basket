@@ -9,37 +9,37 @@
  * @subpackage Add_to_basket/admin/partials
  */
 
-// Extract values from the $atts array or provide default values
-$local_id = !empty($atts['id']) ? esc_attr($atts['id']) : '';
-$local_name = !empty($atts['name']) ? esc_attr($atts['name']) : '';
-$local_label = !empty($atts['label']) ? esc_html($atts['label']) : '';
-$local_value = !empty($atts['value']) ? esc_attr($atts['value']) : '';
-$local_placeholder = !empty($atts['placeholder']) ? esc_attr($atts['placeholder']) : '';
-$local_type = !empty($atts['type']) ? esc_attr($atts['type']) : '';
-$local_input_status = !empty($atts['input_status']) ? esc_attr($atts['input_status']) : '';
-$local_description = !empty($atts['description']) ? esc_html($atts['description']) : '';
 
 echo "<div class='a2b-admin-metaboxes'>";
 
-if (!empty($local_label)) {
-	echo '<label class="bold" for="' . $local_id . '">' . $local_label . ' : </label>';
+if ( ! empty( $atts['label'] ) ) {
+	echo '<label class="bold" for="' . esc_attr( $atts['id'] ) . '">' . esc_html_e( $atts['label'], 'addtobasket' ) . ' : </label>';
 }
+
+
+// $options2 = get_option($this->plugin_name . '-options', );
+// if($options2[$atts['id']]){
+// 	$value = $options2[$atts['id']];
+// }
+
+//print_r( get_option($this->plugin_name)); exit;
 
 ?>
 
 <input
-	id="<?php echo $local_id; ?>"
-	name="<?php echo $local_name; ?>"
-	placeholder="<?php echo $local_placeholder; ?>"
-	type="<?php echo $local_type; ?>"
-	<?php echo $local_input_status; ?>
-	value="<?php echo $local_value; ?>"
-/>
+	class="<?php echo esc_attr( $atts['class'] ); ?>"
+	id="<?php echo esc_attr( $atts['id'] ); ?>"
+	name="<?php echo esc_attr( $atts['id'] ); ?>"
+	placeholder="<?php echo esc_attr( $atts['placeholder'] ); ?>"
+	type="<?php echo esc_attr( $atts['type'] ); ?>"
+	value="<?php echo esc_attr( $atts['value']  );  ?>" />
 
 <?php
-if (!empty($local_description)) {
-	echo '<span class="desc">' . $local_description . '</span><hr/>';
+if (! empty( $atts['description'] )) {
+	echo '<span class="description">' . esc_html_e( $atts['description'], 'addtobasket' ) . ' </span>';
 }
 ?>
 
 </div>
+
+

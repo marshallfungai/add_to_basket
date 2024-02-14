@@ -32,6 +32,13 @@ class Add_to_basket_Activator {
 	 */
 	public static function activate() {
 
+		/**
+		 * For some reason you do not want to activate
+		 * set to the condition below 
+		 * */ 
+		if(false) {
+			wp_die(__('The plugin did not activate.', 'addtobasket'));
+		}
 	}
 
 }

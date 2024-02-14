@@ -90,7 +90,7 @@ class Add_to_basket {
 		if ( defined( 'ADD_TO_BASKET_VERSION' ) ) {
 			$this->version = ADD_TO_BASKET_VERSION;
 		} else {
-			$this->version = '1.0.0';
+			$this->version = '2.0.0';
 		}
 		$this->plugin_name = 'add_to_basket';
 
@@ -100,6 +100,9 @@ class Add_to_basket {
 		$this->define_public_hooks();
 		$this->define_metabox_hooks();
 		$this->checkClientKey();
+
+		
+	
 	}
 
 	/**
@@ -120,47 +123,50 @@ class Add_to_basket {
 	 */
 	private function load_dependencies() {
 
+
+		 // Load composer autoload
+		require_once ADD_TO_BASKET_PATH. 'vendor/autoload.php';
+
 		/**
 		 * The class responsible for orchestrating the actions and filters of the
 		 * core plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-add_to_basket-loader.php';
+		require_once ADD_TO_BASKET_PATH . 'includes/class-add_to_basket-loader.php';
 
 		/**
 		 * The class responsible for defining internationalization functionality
 		 * of the plugin.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-add_to_basket-i18n.php';
+		require_once ADD_TO_BASKET_PATH. 'includes/class-add_to_basket-i18n.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the admin area.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-add_to_basket-admin.php';
+		require_once ADD_TO_BASKET_PATH . 'admin/class-add_to_basket-admin.php';
 
 		/**
 		 * The class responsible for defining all actions that occur in the public-facing
 		 * side of the site.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-add_to_basket-public.php';
+		require_once ADD_TO_BASKET_PATH . 'public/class-add_to_basket-public.php';
 
 		/**
 		 * The class responsible for defining all actions relating to metaboxes.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-add_to_basket-admin-metaboxes.php';
+		require_once ADD_TO_BASKET_PATH . 'admin/class-add_to_basket-admin-metaboxes.php';
 
 		/**
 		 * The class responsible for sanitizing user input
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-add_to_basket-sanitize.php';
+		require_once ADD_TO_BASKET_PATH . 'includes/class-add_to_basket-sanitize.php';
 
 		/**
 		 * The class responsible for all global functions.
 		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/add-to-basket-global-functions.php';
+		require_once ADD_TO_BASKET_PATH . 'includes/add-to-basket-global-functions.php';
 
 		$this->loader = new Add_to_basket_Loader();
 		$this->sanitizer = new Add_to_basket_Sanitize();
-
 	}
 
 	/**
@@ -200,7 +206,7 @@ class Add_to_basket {
 		$plugin_basename = plugin_basename( plugin_dir_path( __DIR__ ) . $this->plugin_name . '.php' );
 		$this->loader->add_filter( 'plugin_action_links_' . $plugin_basename, $plugin_admin, 'add_action_links' );
 
-		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_menu' );
+		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_admin_sub_menu' );
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_settings' );
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_sections' );
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_fields' );
@@ -214,13 +220,10 @@ class Add_to_basket {
 	 * @access   private
 	 */
 	private function define_public_hooks() {
-
 		$plugin_public = new Add_to_basket_Public( $this->get_plugin_name(), $this->get_version() );
-
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 		$this->loader->add_action( 'init', $plugin_public, 'register_shortcodes' );
-
 	}
 
 	/**
