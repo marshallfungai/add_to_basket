@@ -501,7 +501,7 @@ class Add_to_basket_Admin {
 			esc_html__( 'Client Key', 'add2basket' ),
 			array( $this, 'field_text' ),
 			$this->plugin_name , //page
-			$this->plugin_name . '-options',  //section
+			$this->plugin_name . '_verify_configs_section',  //section
 			array(
 				'label_for ' 	=> 'client_key',
 				'description' 	=> 'Key to connect to "Add to basket" account given after creating seller account.',
@@ -517,7 +517,7 @@ class Add_to_basket_Admin {
 			esc_html__( 'A2B Title status', 'add2basket' ),
 			array( $this, 'field_checkbox' ),
 			$this->plugin_name ,
-			$this->plugin_name . '-options',
+			$this->plugin_name . '_verify_configs_section',
 			array(
 				'label_for ' 	=> 'listing-title-header-status',
 				'description' 	=> 'Show/hide title on A2B listing page',
@@ -533,7 +533,7 @@ class Add_to_basket_Admin {
 			esc_html__( 'A2B Title', 'add2basket' ),
 			array( $this, 'field_text' ),
 			$this->plugin_name ,
-			$this->plugin_name . '-options',
+			$this->plugin_name . '_verify_configs_section',
 			array(
 				'label_for ' 	=> 'listing-title-header',
 				'description' 	=> 'Title for A2B listing page',
@@ -553,9 +553,9 @@ class Add_to_basket_Admin {
 	public function register_sections() {
 
 		add_settings_section(
-			$this->plugin_name . '-options',
+			$this->plugin_name . '_verify_configs_section',
 			apply_filters( $this->plugin_name . 'section-configs', esc_html__( 'Configs', 'add2basket' ) ),
-			array( $this, 'section_configs' ),
+			array( $this, 'verify_configs_section_callback' ),
 			$this->plugin_name 
 		);
 
@@ -571,7 +571,7 @@ class Add_to_basket_Admin {
 
 		// register_setting( $option_group, $option_name, $sanitize_callback );
 		register_setting(
-			$this->plugin_name . '-options',
+			$this->plugin_name . '_verify_configs_section',
 			$this->plugin_name . '-options',
 			array( $this, 'validate_options' )
 		);
@@ -606,7 +606,7 @@ class Add_to_basket_Admin {
 
         $body = wp_remote_retrieve_body($response);
         $verified_data = json_decode($body, true);
-
+		update_option( $this->plugin_name . '_a2b_access', $verified_data );
 		//wp_die(print_r($verified_data));
 
         // You can add additional verification logic based on the API response
@@ -623,7 +623,7 @@ class Add_to_basket_Admin {
 	 * @param 		array 		$params 		Array of parameters for the section
 	 * @return 		mixed 						The settings section
 	 */
-	public function section_configs( $params ) {
+	public function verify_configs_section_callback( $params ) {
 
 		include( plugin_dir_path( __FILE__ ) . 'partials/add_to_basket-admin-section-configs.php' );
 
@@ -682,6 +682,7 @@ class Add_to_basket_Admin {
         if ($verified_data !== false) {
             // If verification is successful, update the client_key with the verified data
             $input['client_key'] = $verified_data;
+			
         } else {
             // If verification fails, display an error message
             add_settings_error(
