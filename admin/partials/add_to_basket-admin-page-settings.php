@@ -21,6 +21,7 @@
 	<?php
 	settings_errors();
 	settings_fields( $this->plugin_name . '_verify_configs_section' );
+	//settings_fields( $this->plugin_name . '_wp_configs_section' );
 	do_settings_sections( $this->plugin_name );
 	submit_button( 'Save Settings' );
 

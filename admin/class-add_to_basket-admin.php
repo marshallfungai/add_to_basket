@@ -513,11 +513,27 @@ class Add_to_basket_Admin {
 		);
 
 		add_settings_field(
+			'import_products',
+			esc_html__( 'Import Products', 'add2basket' ),
+			array( $this, 'field_checkbox' ),
+			$this->plugin_name ,
+			$this->plugin_name . '_products_section',
+			array(
+				'label_for ' 	=> 'import_products',
+				'description' 	=> 'Import products from A2B to your site',
+				'id' 			=> 'import_products',
+				'class' 	=> 'form-control',
+				'default' 		=> '1',
+				// 'value' 		=> 0,
+			)
+		);
+
+		add_settings_field(
 			'listing-title-header-status',
 			esc_html__( 'A2B Title status', 'add2basket' ),
 			array( $this, 'field_checkbox' ),
 			$this->plugin_name ,
-			$this->plugin_name . '_verify_configs_section',
+			$this->plugin_name . '_wp_configs_section',
 			array(
 				'label_for ' 	=> 'listing-title-header-status',
 				'description' 	=> 'Show/hide title on A2B listing page',
@@ -533,7 +549,7 @@ class Add_to_basket_Admin {
 			esc_html__( 'A2B Title', 'add2basket' ),
 			array( $this, 'field_text' ),
 			$this->plugin_name ,
-			$this->plugin_name . '_verify_configs_section',
+			$this->plugin_name . '_wp_configs_section',
 			array(
 				'label_for ' 	=> 'listing-title-header',
 				'description' 	=> 'Title for A2B listing page',
@@ -554,10 +570,26 @@ class Add_to_basket_Admin {
 
 		add_settings_section(
 			$this->plugin_name . '_verify_configs_section',
-			apply_filters( $this->plugin_name . 'section-configs', esc_html__( 'Configs', 'add2basket' ) ),
+			apply_filters( $this->plugin_name . 'section-configs', esc_html__( 'Verification Configs', 'add2basket' ) ),
 			array( $this, 'verify_configs_section_callback' ),
 			$this->plugin_name 
 		);
+
+		
+		add_settings_section(
+			$this->plugin_name . '_products_section',
+			apply_filters( $this->plugin_name . 'section-configs', esc_html__( 'Products Configs', 'add2basket' ) ),
+			array( $this, 'verify_configs_section_callback' ),
+			$this->plugin_name 
+		);
+		
+		add_settings_section(
+			$this->plugin_name . '_wp_configs_section',
+			apply_filters( $this->plugin_name . 'section-configs', esc_html__( 'Wordpress Configs', 'add2basket' ) ),
+			array( $this, 'verify_configs_section_callback' ),
+			$this->plugin_name 
+		);
+
 
 	} // register_sections()
 
@@ -587,32 +619,42 @@ class Add_to_basket_Admin {
 	 * @return 		mixed 						The settings section
 	 */
 
-	private function verify_settings_with_api($input) {
+	 private function verify_settings_with_api($s_client_key, $i_importProducts) {
 	
 		
         // Make your external API request here to verify the settings
         // If the verification is successful, return the verified data
         // If not, return false or an error message
-		$data = array('client_key' => $input);
-        $args = array(
-			'body' => $data,
+		$data1 = array('client_key' => $s_client_key);
+        $args1 = array(
+			'client_key' => $data1,
 		);
-        $api_url = 'https://api.addtobasket.net/ws/wp/set_login';
-        $response = wp_remote_post($api_url, $args);
+        $login_api_url = 'https://api.addtobasket.net/ws/wp/set_login';
+        $verifyResponse = wp_remote_post($login_api_url , $args1);
 
-        if (is_wp_error($response)) {
+        if (is_wp_error($verifyResponse)) {
             return false; // Verification failed
         }
-
-        $body = wp_remote_retrieve_body($response);
-        $verified_data = json_decode($body, true);
+		$verifyBody = wp_remote_retrieve_body($verifyResponse);
+        $verified_data = json_decode($verifyBody, true);
 		update_option( $this->plugin_name . '_a2b_access', $verified_data );
-		//wp_die(print_r($verified_data));
 
-        // You can add additional verification logic based on the API response
-        // ...
-
-        return $input; // Return verified data
+		// Import products
+		if($i_importProducts == 1) {
+			$args2 = array(
+				's_tahir' => $verified_data,
+			);
+			$products_api_url = 'https://api.addtobasket.net/ws/wp/get_products';
+            $productResponse = wp_remote_post($login_api_url , $args2);
+			if (is_wp_error($productResponse)) {
+				return false; // Verification failed
+			}
+			$productsBody = wp_remote_retrieve_body($productResponse);
+			$products = json_decode($productsBody, true);
+			update_option( $this->plugin_name . '_a2b_products', $products );
+		}
+		
+        return $s_client_key; // Return verified data
     }
 
 
@@ -624,7 +666,7 @@ class Add_to_basket_Admin {
 	 * @return 		mixed 						The settings section
 	 */
 	public function verify_configs_section_callback( $params ) {
-
+		//echo '<hr/>';
 		include( plugin_dir_path( __FILE__ ) . 'partials/add_to_basket-admin-section-configs.php' );
 
 	} // section_configs()
@@ -662,6 +704,7 @@ class Add_to_basket_Admin {
 		$options = array();
 
 		$options[] = array( 'client_key', 'text', 'xxx' );
+		$options[] = array( 'import_products', 'checkbox', 1 );
 		$options[] = array( 'listing-title-header-status', 'checkbox', 0 );
 		$options[] = array( 'listing-title-header', 'text', 'Instant Payments for you' );
 
@@ -674,10 +717,14 @@ class Add_to_basket_Admin {
 
 		 // Validate and sanitize each individual option in the array
 		// $input['client_key'] = sanitize_text_field($input['client_key']);
+		$input['import_products'] = intval($input['import_products']);
 		$input['listing-title-header-status'] = intval($input['listing-title-header-status']);
 		$input['listing-title-header'] = sanitize_text_field($input['listing-title-header']);
 
-		$verified_data = $this->verify_settings_with_api(sanitize_text_field($input['client_key']));
+		$verified_data = $this->verify_settings_with_api(
+			sanitize_text_field($input['client_key']),
+			$input['import_products'] 
+		);
 
         if ($verified_data !== false) {
             // If verification is successful, update the client_key with the verified data
@@ -692,44 +739,8 @@ class Add_to_basket_Admin {
                 'error'
             );
         }
-
-		
-		  // Add more validations as needed
-  
+ 
 		return $input;
-
-
-		// $valid 		= array();
-		// $options 	= $this->get_options_list();
-		
-		// foreach ( $options as $option ) {
-
-		// 	$name = $option[0];
-		// 	$type = $option[1];
-
-		// 	$valid[$option[0]] = $this->sanitizer( $type, $input[$name] );
-
-		// 	/*if ( ! isset( $input[$option[0]] ) ) { continue; }
-
-		// 	$sanitizer 	= new Add_to_basket_Sanitize();
-
-		// 	$sanitizer->set_data( $input[$option[0]] );
-		// 	$sanitizer->set_type( $option[1] );
-
-		// 	$valid[$option[0]] = $sanitizer->clean();
-
-		// 	if ( $valid[$option[0]] != $input[$option[0]] ) {
-
-		// 		add_settings_error( $option[0], $option[0] . '_error', esc_html__( $option[0] . ' error.', 'now-hiring' ), 'error' );
-
-		// 	}
-
-		// 	unset( $sanitizer );
-		// 		*/
-
-		// }
-
-		// return $valid;
 
 	} // validate_options()
 
