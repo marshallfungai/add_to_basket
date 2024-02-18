@@ -104,31 +104,6 @@ class Add_to_basket_Metaboxes
 			)
 		);
 
-//	add_meta_box(
-//		'now_hiring_job_requirements',
-//		apply_filters( $this->plugin_name . '-metabox-title-requirements', esc_html__( 'Job Requirements', 'add2basket' ) ),
-//		array( $this, 'metabox' ),
-//		$this->plugin_name,
-//		'normal',
-//		'default',
-//		array(
-//			'file' => 'job-requirements'
-//		)
-//	);
-//
-//	add_meta_box(
-//		'now_hiring_job_files',
-//		apply_filters( $this->plugin_name . '-metabox-title-requirements', esc_html__( 'Related Files', 'add2basket' ) ),
-//		array( $this, 'metabox' ),
-//		$this->plugin_name,
-//		'side',
-//		'default',
-//		array(
-//			'file' => 'job-files',
-//			'classes' => 'equal'
-//		)
-//	);
-
 	} // add_metaboxes()
 
 	/**
@@ -174,7 +149,7 @@ class Add_to_basket_Metaboxes
 	 * @since        1.0.0
 	 * @access        public
 	 */
-	private function get_metabox_fields()
+	public function get_metabox_fields()
 	{
 
 		$fields = array();
@@ -212,7 +187,7 @@ class Add_to_basket_Metaboxes
 
 	} // metabox()
 
-	private function sanitizer($type, $data)
+	public function sanitizer($type, $data)
 	{
 
 		if (empty($type)) {
@@ -322,45 +297,6 @@ class Add_to_basket_Metaboxes
 			$type = $meta[1];
 			$new_value = $this->sanitizer($type, $_POST[$name]);
 			update_post_meta($post_id, $name, $new_value);
-
-//			if ('repeater' === $type && is_array($meta[2])) {
-//
-//				$clean = array();
-//
-//				foreach ($meta[2] as $field) {
-//
-//					foreach ($_POST[$field[0]] as $data) {
-//
-//						if (empty($data)) {
-//							continue;
-//						}
-//
-//						$clean[$field[0]][] = $this->sanitizer($field[1], $data);
-//
-//					} // foreach
-//
-//				} // foreach
-//
-//				$count = a2b_get_max($clean);
-//				$new_value = array();
-//
-//				for ($i = 0; $i < $count; $i++) {
-//
-//					foreach ($clean as $field_name => $field) {
-//
-//						$new_value[$i][$field_name] = $field[$i];
-//
-//					} // foreach $clean
-//
-//				} // for
-//
-//			} else {
-//
-//
-//
-//			}
-
-
 
 		} // foreach
 

@@ -100,9 +100,6 @@ class Add_to_basket {
 		$this->define_public_hooks();
 		$this->define_metabox_hooks();
 		$this->checkClientKey();
-
-		
-	
 	}
 
 	/**

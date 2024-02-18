@@ -506,9 +506,9 @@ class Add_to_basket_Admin {
 				'label_for ' 	=> 'client_key',
 				'description' 	=> 'Key to connect to "Add to basket" account given after creating seller account.',
 				'id' 			=> 'client_key',
-				'class' 	=> 'form-control',
+				'class' 	    => 'form-control',
 				'placeholder' 	=> 'Enter client key',
-				// 'value' 		=> 'Enter client key',
+				'type' 		    => 'password',
 			)
 		);
 
@@ -619,7 +619,7 @@ class Add_to_basket_Admin {
 	 * @return 		mixed 						The settings section
 	 */
 
-	 private function verify_settings_with_api($s_client_key, $i_importProducts) {
+	 private function verify_settings_with_api($s_client_key, $i_can_import_products) {
 	
 		
         // Make your external API request here to verify the settings
@@ -636,26 +636,115 @@ class Add_to_basket_Admin {
             return false; // Verification failed
         }
 		$verifyBody = wp_remote_retrieve_body($verifyResponse);
-        $verified_data = json_decode($verifyBody, true);
-		update_option( $this->plugin_name . '_a2b_access', $verified_data );
+        $o_access_key = json_decode($verifyBody, true);
+		update_option( $this->plugin_name . '_a2b_access', $o_access_key );
 
-		// Import products
-		if($i_importProducts == 1) {
+		// import products
+		if($i_can_import_products == 1) {
+			$decodedData = json_decode($jsonData);
+
+			$validateToAPI = new stdClass();
+			$validateToAPI->ISTANBUL = $o_access_key['ISTANBUL'];
+			$validateToAPI->NEWYORK = $o_access_key['NEWYORK'];
+			$validateToAPI->SESS_BRIDGE = $o_access_key['SESS_BRIDGE'];
+			$validateToAPI->LONDON = $o_access_key['LONDON'];
+			$validateToAPI->FRANKFURT = $o_access_key['FRANKFURT'];
+
 			$args2 = array(
-				's_tahir' => $verified_data,
+				's_tahir' => array("userContent" => array($validateToAPI)),
 			);
+
+			//wp_die(json_encode($args2));
 			$products_api_url = 'https://api.addtobasket.net/ws/wp/get_products';
             $productResponse = wp_remote_post($login_api_url , $args2);
+			//wp_die(json_encode($productResponse['body']));
 			if (is_wp_error($productResponse)) {
 				return false; // Verification failed
 			}
 			$productsBody = wp_remote_retrieve_body($productResponse);
 			$products = json_decode($productsBody, true);
-			update_option( $this->plugin_name . '_a2b_products', $products );
+		
+			//wp_die( '<pre>' . print_r($products) . '</pre>' );
+			$this->import_products_to_a2b($products);
+			
 		}
+
+		// // Import products
+		// if ($i_can_import_products == 1) {
+		// 	$decodedData = json_decode($jsonData);
+		
+		// 	$validateToAPI = new stdClass();
+		// 	$validateToAPI->ISTANBUL = $o_access_key['ISTANBUL'];
+		// 	$validateToAPI->NEWYORK = $o_access_key['NEWYORK'];
+		// 	$validateToAPI->SESS_BRIDGE = $o_access_key['SESS_BRIDGE'];
+		// 	$validateToAPI->LONDON = $o_access_key['LONDON'];
+		// 	$validateToAPI->FRANKFURT = $o_access_key['FRANKFURT'];
+		
+		// 	// Create form-data structure
+		// 	$args2 = array(
+		// 		'body' => array(
+		// 			's_tahir' => json_encode(array("userContent" => array($validateToAPI))),
+		// 		),
+		// 		'headers' => array(
+		// 			'Content-Type' => 'multipart/form-data',
+		// 		),
+		// 	);
+		
+		// 	//wp_die(json_encode($args2));
+		
+		// 	$products_api_url = 'https://api.addtobasket.net/ws/wp/get_products';
+		// 	$productResponse = wp_remote_post($products_api_url, $args2);
+		// 	wp_die(json_encode($productResponse));
+		
+		// 	if (is_wp_error($productResponse)) {
+		// 		return false; // Verification failed
+		// 	}
+		
+		// 	$productsBody = wp_remote_retrieve_body($productResponse);
+		// 	$products = json_decode($productsBody, true);
+		
+		// 	// Uncomment the line below for debugging
+		// 	// wp_die('<pre>' . print_r($products, true) . '</pre>');
+		
+		// 	$this->import_products_to_a2b($products);
+		// }
+		
 		
         return $s_client_key; // Return verified data
     }
+
+	/**
+	 * Import products to A2B client
+	 */
+	private function import_products_to_a2b($products) {
+		
+		$new_post = array(
+			'post_title' => 'Iphone XXI',
+			'post_content' => '',
+			'post_status' => 'public',
+			'post_type' => $this->plugin_name
+		);
+
+		$post_id = wp_insert_post( $new_post );
+		
+		if( $post_id ){
+			update_option( $this->plugin_name . '_a2b_products', $products ); // Save the products to the database (temporary)
+			// Update custom field on the new post
+			//update_post_meta( $post_id, 'my_custom_field', 'Hello!' );
+
+			// $plugin_metaboxes = new Add_to_basket_Metaboxes( $this->plugin_name, ADD_TO_BASKET_VERSION );
+			// $metas = $plugin_metaboxes->get_metabox_fields();
+			// foreach ($metas as $meta) {
+			// 	$name = $meta[0];
+			// 	$type = $meta[1];
+			// 	$new_value = $plugin_metaboxes->sanitizer($type, 'Some value');
+			// 	update_post_meta($post_id, $name, $new_value);
+			// } 
+			
+		} else {
+			echo "Error, post not inserted";
+		}
+	}
 
 
 	/**
