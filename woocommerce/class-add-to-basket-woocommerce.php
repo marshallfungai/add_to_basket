@@ -39,7 +39,7 @@ class Add_To_Basket_Woocommerce extends WC_Payment_Gateway{
 		$this->method_title       = __( 'Add To Basket', 'add2basket' );
 		$this->api_key            = __( 'Add API Key', 'add2basket' );
 		$this->widget_id          = __( 'Add Widget ID', 'add2basket' );
-		$this->method_description = __( 'Have your customers pay with Add To Basket.', 'add2basket' );
+		$this->method_description = __( 'Add to basket helps you aggregate all your payment gateways in one place.', 'add2basket' );
 		$this->has_fields         = false;
 	}
 
