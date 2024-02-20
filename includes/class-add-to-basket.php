@@ -49,6 +49,15 @@ class Add_to_basket {
 	protected $plugin_name;
 
 	/**
+	 * Define woocommerce class for global access.
+	 *
+	 * @since    1.0.0
+	 * @access   protected
+	 * @var      Add_To_Basket_Woocommerce    
+	 */
+	protected $class_woocommerce;
+
+	/**
 	 * The current version of the plugin.
 	 *
 	 * @since    1.0.0
@@ -92,14 +101,12 @@ class Add_to_basket {
 		} else {
 			$this->version = '2.0.0';
 		}
-		$this->plugin_name = 'add_to_basket';
+		$this->plugin_name = 'add-to-basket';
 
 		$this->load_dependencies();
-		$this->set_locale();
-		$this->define_admin_hooks();
-		$this->define_public_hooks();
-		$this->define_metabox_hooks();
-		$this->checkClientKey();
+		//$this->set_locale();
+		$this->define_woocommerce_hooks();
+		//$this->checkClientKey();
 	}
 
 	/**
@@ -122,48 +129,32 @@ class Add_to_basket {
 
 
 		 // Load composer autoload
-		require_once ADD_TO_BASKET_PATH. 'vendor/autoload.php';
+		//require_once ADD_TO_BASKET_PATH. 'vendor/autoload.php';
 
 		/**
 		 * The class responsible for orchestrating the actions and filters of the
 		 * core plugin.
 		 */
-		require_once ADD_TO_BASKET_PATH . 'includes/class-add_to_basket-loader.php';
+		require_once ADD_TO_BASKET_PATH . 'includes/class-add-to-basket-loader.php';
+
+		/**
+		 * The class responsible for woocommerce functions
+		 */
+		require_once ADD_TO_BASKET_PATH . 'woocommerce/class-add-to-basket-woocommerce.php';
 
 		/**
 		 * The class responsible for defining internationalization functionality
 		 * of the plugin.
 		 */
-		require_once ADD_TO_BASKET_PATH. 'includes/class-add_to_basket-i18n.php';
-
-		/**
-		 * The class responsible for defining all actions that occur in the admin area.
-		 */
-		require_once ADD_TO_BASKET_PATH . 'admin/class-add_to_basket-admin.php';
-
-		/**
-		 * The class responsible for defining all actions that occur in the public-facing
-		 * side of the site.
-		 */
-		require_once ADD_TO_BASKET_PATH . 'public/class-add_to_basket-public.php';
-
-		/**
-		 * The class responsible for defining all actions relating to metaboxes.
-		 */
-		require_once ADD_TO_BASKET_PATH . 'admin/class-add_to_basket-admin-metaboxes.php';
+		//require_once ADD_TO_BASKET_PATH. 'includes/class-add-to-basket-i18n.php';
 
 		/**
 		 * The class responsible for sanitizing user input
 		 */
-		require_once ADD_TO_BASKET_PATH . 'includes/class-add_to_basket-sanitize.php';
-
-		/**
-		 * The class responsible for all global functions.
-		 */
-		require_once ADD_TO_BASKET_PATH . 'includes/add-to-basket-global-functions.php';
+		//require_once ADD_TO_BASKET_PATH . 'includes/class-add-to-basket-sanitize.php';
 
 		$this->loader = new Add_to_basket_Loader();
-		$this->sanitizer = new Add_to_basket_Sanitize();
+		//$this->sanitizer = new Add_to_basket_Sanitize();
 	}
 
 	/**
@@ -175,13 +166,13 @@ class Add_to_basket {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function set_locale() {
+	// private function set_locale() {
 
-		$plugin_i18n = new Add_to_basket_i18n();
+	// 	$plugin_i18n = new Add_to_basket_i18n();
 
-		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
+	// 	$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
 
-	}
+	// }
 
 	/**
 	 * Register all of the hooks related to the admin area functionality
@@ -190,71 +181,35 @@ class Add_to_basket {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	private function define_admin_hooks() {
+	private function define_woocommerce_hooks() {
 
-		$plugin_admin = new Add_to_basket_Admin( $this->get_plugin_name(), $this->get_version() );
+        /*
+       	add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
+		add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
+		add_filter( 'woocommerce_payment_complete_order_status', array( $this, 'change_payment_complete_order_status' ), 10, 3 );
 
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
-		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-		$this->loader->add_action( 'init', $plugin_admin, 'fn_add_to_basket_admin' );
-		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_plugin_admin_menu' ); // Add menu page
+		// Customer Emails.  
+		add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 3 ); 
+        
+        */
+
+        $plugin_woocommerce = new Add_To_Basket_Woocommerce( $this->get_plugin_name(), $this->get_version() );
+		
+
+		$this->loader->add_action( 'woocommerce_payment_gateways', $plugin_woocommerce, 'add_to_basket_payment_init' );
+		//$this->loader->add_action( 'admin_enqueue_scripts',  $plugin_woocommerce, 'enqueue_scripts' );
 
         // Add Settings link to the plugin
 		$plugin_basename = plugin_basename( plugin_dir_path( __DIR__ ) . $this->plugin_name . '.php' );
-		$this->loader->add_filter( 'plugin_action_links_' . $plugin_basename, $plugin_admin, 'add_action_links' );
-
-		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_admin_sub_menu' );
-		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_settings' );
-		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_sections' );
-		$this->loader->add_action( 'admin_init', $plugin_admin, 'register_fields' );
+		//$this->loader->add_filter( 'plugin_action_links_' . $plugin_basename,  $plugin_woocommerce, 'add_action_links' );
+		
 	}
 
-	/**
-	 * Register all of the hooks related to the public-facing functionality
-	 * of the plugin.
-	 *
-	 * @since    1.0.0
-	 * @access   private
-	 */
-	private function define_public_hooks() {
-		$plugin_public = new Add_to_basket_Public( $this->get_plugin_name(), $this->get_version() );
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
-		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
-		$this->loader->add_action( 'init', $plugin_public, 'register_shortcodes' );
-	}
+    public function add_to_basket_payment_init($gateways) {
+        $gateways[] = 'Add_To_Basket_Woocommerce';
+        return $gateways;
+    }
 
-	/**
-	 * Register all of the hooks related to metaboxes
-	 *
-	 * @since 		1.0.0
-	 * @access 		private
-	 */
-	private function define_metabox_hooks() {
-
-		$plugin_metaboxes = new Add_to_basket_Metaboxes( $this->get_plugin_name(), $this->get_version() );
-
-		$this->loader->add_action( 'add_meta_boxes', $plugin_metaboxes, 'add_metaboxes' );
-		$this->loader->add_action( 'add_meta_boxes', $plugin_metaboxes, 'set_meta' );
-		$this->loader->add_action( 'save_post', $plugin_metaboxes, 'validate_meta', 10, 2 );
-
-	} // define_metabox_hooks()
-
-	/**
-	 *  Check if client key is valid.
-	 *
-	 * @since     1.0.0
-	 *
-	 */
-	protected function checkClientKey() {
-		$options = get_option($this->plugin_name.'-options');
-		if(isset($options['client-key'])){
-			//define('A2B_ACTIVE', true);
-			$this->clientValid = true;
-			return true;
-		}
-		//define('A2B_ACTIVE', false);
-		$this->clientValid = false;
-	}
 
 	/**
 	 * Run the loader to execute all of the hooks with WordPress.
@@ -295,6 +250,5 @@ class Add_to_basket {
 	public function get_version() {
 		return $this->version;
 	}
-
 
 }
