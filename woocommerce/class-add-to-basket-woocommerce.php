@@ -7,11 +7,11 @@ class Add_To_Basket_Woocommerce extends WC_Payment_Gateway{
 	 */
 	public function __construct() {
 		// Setup general properties.
-		//$this->setup_properties();
+		$this->setup_properties();
 
 		// Load the settings.
 		$this->init_form_fields();
-		//$this->init_settings();
+		$this->init_settings();
 
 		// Get settings.
 		$this->title              = $this->get_option( 'title' );
@@ -35,7 +35,7 @@ class Add_To_Basket_Woocommerce extends WC_Payment_Gateway{
 	 */
 	protected function setup_properties() {
 		$this->id                 = 'addtobasket';
-		$this->icon               = apply_filters( 'woocommerce_payleo_icon', plugins_url('../assets/icon.png', __FILE__ ) );
+		$this->icon               = apply_filters( 'woocommerce_a2b_icon', plugins_url('../assets/icon.png', __FILE__ ) );
 		$this->method_title       = __( 'Add To Basket', 'add2basket' );
 		$this->api_key            = __( 'Add API Key', 'add2basket' );
 		$this->widget_id          = __( 'Add Widget ID', 'add2basket' );
@@ -64,7 +64,7 @@ class Add_To_Basket_Woocommerce extends WC_Payment_Gateway{
 			'title'              => array(
 				'title'       => __( 'Title', 'add2basket' ),
 				'type'        => 'text',
-				'description' => __( 'Payleo Mobile Payment method description that the customer will see on your checkout.', 'add2basket' ),
+				'description' => __( 'Add To Basket method description that the customer will see on your checkout.', 'add2basket' ),
 				'default'     => __( 'Add To Basket', 'add2basket' ),
 				'desc_tip'    => true,
 			),
@@ -83,7 +83,7 @@ class Add_To_Basket_Woocommerce extends WC_Payment_Gateway{
 			'description'        => array(
 				'title'       => __( 'Description', 'add2basket' ),
 				'type'        => 'textarea',
-				'description' => __( 'Payleo Mobile Payment method description that the customer will see on your website.', 'add2basket' ),
+				'description' => __( 'Add  to basket allows you to have multiple payments methods and also manage products from dedicated ecommerce platform', 'add2basket' ),
 				'default'     => __( 'Add To Basket before delivery.', 'add2basket' ),
 				'desc_tip'    => true,
 			),
@@ -100,7 +100,7 @@ class Add_To_Basket_Woocommerce extends WC_Payment_Gateway{
 				'class'             => 'wc-enhanced-select',
 				'css'               => 'width: 400px;',
 				'default'           => '',
-				'description'       => __( 'If payleo is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'add2basket' ),
+				'description'       => __( 'If A2B is only available for certain methods, set it up here. Leave blank to enable for all methods.', 'add2basket' ),
 				'options'           => $this->load_shipping_method_options(),
 				'desc_tip'          => true,
 				'custom_attributes' => array(
@@ -109,7 +109,7 @@ class Add_To_Basket_Woocommerce extends WC_Payment_Gateway{
 			),
 			'enable_for_virtual' => array(
 				'title'   => __( 'Accept for virtual orders', 'add2basket' ),
-				'label'   => __( 'Accept payleo if the order is virtual', 'add2basket' ),
+				'label'   => __( 'Accept Add To Basket if the order is virtual', 'add2basket' ),
 				'type'    => 'checkbox',
 				'default' => 'yes',
 			),
@@ -185,7 +185,7 @@ class Add_To_Basket_Woocommerce extends WC_Payment_Gateway{
 			if ( ! isset( $_REQUEST['tab'] ) || 'checkout' !== $_REQUEST['tab'] ) {
 				return false;
 			}
-			if ( ! isset( $_REQUEST['section'] ) || 'payleo' !== $_REQUEST['section'] ) {
+			if ( ! isset( $_REQUEST['section'] ) || 'addtobasket' !== $_REQUEST['section'] ) {
 				return false;
 			}
 			// phpcs:enable WordPress.Security.NonceVerification
@@ -317,11 +317,11 @@ class Add_To_Basket_Woocommerce extends WC_Payment_Gateway{
 		$order = wc_get_order( $order_id );
 
 		if ( $order->get_total() > 0 ) {
-			$this->payleo_payment_processing( $order );
+			$this->addtobasket_payment_processing( $order );
 		}
 	}
 
-	private function payleo_payment_processing( $order ) {
+	private function addtobasket_payment_processing( $order ) {
 
 		$total = intval( $order->get_total() );
 		var_dump($total);
@@ -342,7 +342,7 @@ class Add_To_Basket_Woocommerce extends WC_Payment_Gateway{
 		}
 
 		if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
-			$order->update_status( apply_filters( 'woocommerce_payleo_process_payment_order_status', $order->has_downloadable_item() ? 'wc-invoiced' : 'processing', $order ), __( 'Payments pending.', 'add2basket' ) );
+			$order->update_status( apply_filters( 'woocommerce_a2b_process_payment_order_status', $order->has_downloadable_item() ? 'wc-invoiced' : 'processing', $order ), __( 'Payments pending.', 'add2basket' ) );
 		}
 
 		if ( 200 === wp_remote_retrieve_response_code( $response ) ) {
@@ -373,7 +373,7 @@ class Add_To_Basket_Woocommerce extends WC_Payment_Gateway{
 	}
 
 	/**
-	 * Change payment complete order status to completed for payleo orders.
+	 * Change payment complete order status to completed for Add To Basket orders.
 	 *
 	 * @since  3.1.0
 	 * @param  string         $status Current order status.
@@ -382,7 +382,7 @@ class Add_To_Basket_Woocommerce extends WC_Payment_Gateway{
 	 * @return string
 	 */
 	public function change_payment_complete_order_status( $status, $order_id = 0, $order = false ) {
-		if ( $order && 'payleo' === $order->get_payment_method() ) {
+		if ( $order && 'addtobasket' === $order->get_payment_method() ) {
 			$status = 'completed';
 		}
 		return $status;

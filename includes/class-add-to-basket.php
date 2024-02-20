@@ -195,7 +195,6 @@ class Add_to_basket {
 
         $plugin_woocommerce = new Add_To_Basket_Woocommerce( $this->get_plugin_name(), $this->get_version() );
 		
-
 		$this->loader->add_action( 'woocommerce_payment_gateways', $plugin_woocommerce, 'add_to_basket_payment_init' );
 		//$this->loader->add_action( 'admin_enqueue_scripts',  $plugin_woocommerce, 'enqueue_scripts' );
 
