@@ -9,8 +9,8 @@
  * @link       https://marshallfungai.github.io
  * @since      1.0.0
  *
- * @package    Add_to_basket
- * @subpackage Add_to_basket/includes
+ * @package    Add-to-basket
+ * @subpackage Add-to-basket/includes
  */
 
 /**
@@ -21,7 +21,7 @@
  *
  * @since      1.0.0
  * @package    Add_to_basket
- * @subpackage Add_to_basket/includes
+ * @subpackage Add-to-basket/includes
  * @author     Fungai Marshall <marshall@devartists.com>
  */
 class Add_to_basket_i18n {

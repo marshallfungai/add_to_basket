@@ -146,7 +146,7 @@ class Add_to_basket {
 		 * The class responsible for defining internationalization functionality
 		 * of the plugin.
 		 */
-		//require_once ADD_TO_BASKET_PATH. 'includes/class-add-to-basket-i18n.php';
+		require_once ADD_TO_BASKET_PATH. 'includes/class-add-to-basket-i18n.php';
 
 		/**
 		 * The class responsible for sanitizing user input
@@ -166,13 +166,13 @@ class Add_to_basket {
 	 * @since    1.0.0
 	 * @access   private
 	 */
-	// private function set_locale() {
+	private function set_locale() {
 
-	// 	$plugin_i18n = new Add_to_basket_i18n();
+		$plugin_i18n = new Add_to_basket_i18n();
 
-	// 	$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
+		$this->loader->add_action( 'plugins_loaded', $plugin_i18n, 'load_plugin_textdomain' );
 
-	// }
+	}
 
 	/**
 	 * Register all of the hooks related to the admin area functionality
