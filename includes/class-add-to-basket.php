@@ -101,7 +101,7 @@ class Add_to_basket {
 		} else {
 			$this->version = '2.0.0';
 		}
-		$this->plugin_name = 'add-to-basket';
+		$this->plugin_name = ADD_TO_BASKET_PLUGIN_NAME;
 
 		$this->load_dependencies();
 		//$this->set_locale();
@@ -196,6 +196,7 @@ class Add_to_basket {
         $plugin_woocommerce = new Add_To_Basket_Woocommerce( $this->get_plugin_name(), $this->get_version() );
 		
 		$this->loader->add_action( 'woocommerce_payment_gateways', $plugin_woocommerce, 'add_to_basket_payment_init' );
+		$this->loader->add_action( 'woocommerce_update_options_payment_gateways_'. $this->get_plugin_name() , $plugin_woocommerce, 'process_admin_options' );
 		//$this->loader->add_action( 'admin_enqueue_scripts',  $plugin_woocommerce, 'enqueue_scripts' );
 
         // Add Settings link to the plugin

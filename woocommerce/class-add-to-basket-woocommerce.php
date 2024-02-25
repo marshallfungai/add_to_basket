@@ -1,15 +1,34 @@
 <?php
 
 class Add_To_Basket_Woocommerce extends WC_Payment_Gateway{
+
+		/**
+	 * The plugin options.
+	 *
+	 * @since 		1.0.0
+	 * @access 		private
+	 * @var 		string 			$options    The plugin options.
+	 */
+	private $options;
+
+	/**
+	 * The unique identifier of this plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   protected
+	 * @var      string    $plugin_name    The string used to uniquely identify this plugin.
+	 */
+	protected $plugin_name;
+
  
     /**
 	 * Constructor for the gateway.
 	 */
 	public function __construct() {
-		// Setup general properties.
-		$this->setup_properties();
 
-		// Load the settings.
+		$this->plugin_name = ADD_TO_BASKET_PLUGIN_NAME;
+		$this->set_options();
+		$this->setup_properties();
 		$this->init_form_fields();
 		$this->init_settings();
 
@@ -34,7 +53,7 @@ class Add_To_Basket_Woocommerce extends WC_Payment_Gateway{
 	 * Setup general properties for the gateway.
 	 */
 	protected function setup_properties() {
-		$this->id                 = 'addtobasket';
+		$this->id                 = $this->plugin_name;
 		$this->icon               = apply_filters( 'woocommerce_a2b_icon', plugins_url('../assets/icon.png', __FILE__ ) );
 		$this->method_title       = __( 'Add To Basket', 'add2basket' );
 		$this->api_key            = __( 'Add API Key', 'add2basket' );
@@ -43,10 +62,131 @@ class Add_To_Basket_Woocommerce extends WC_Payment_Gateway{
 		$this->has_fields         = false;
 	}
 
+	/**
+	 *  Init payment gateway
+	 */
     public function add_to_basket_payment_init($gateways) {
         $gateways[] = 'Add_To_Basket_Woocommerce';
         return $gateways;
     }
+
+	/**
+	 * Process admin settings on save
+	 */
+	public function process_admin_options() {
+		// Check Add to basket API key
+		$api_key_id = 'woocommerce_' . $this->plugin_name . '_' . sanitize_text_field($_POST['api_key']);
+		$api_key = isset($_POST[$api_key_id]) ? sanitize_text_field($_POST['$api_key_id']) : '';
+
+		if (!$this->check_API_Key($api_key)) {
+			WC_Admin_Settings::add_error(__('Option cannot be saved due to a specific condition.', 'your-text-domain'));
+			return;
+		}
+
+		// Process and save other settings as needed
+		$this->update_option('api_key', $api_key);
+		$this->update_option('description', sanitize_text_field($_POST['description']));
+		$this->update_option('widget_id', sanitize_text_field($_POST['widget_id']));
+		$this->update_option('instructions', sanitize_text_field($_POST['instructions']));
+		$this->update_option('enable_for_methods', $_POST['enable_for_methods']);
+
+		// Save the settings (if needed)
+		//$this->save_settings();
+
+		// Add a notice to indicate that settings have been saved
+		WC_Admin_Settings::add_message(__('Settings saved.', 'add2basket'));
+	}
+
+
+	protected function check_API_Key($s_apiKey, $i_can_import_products=true) {
+
+		/// TODO: Check api key with add to basket server
+		$data1 = array('client_key' => $s_apiKey);
+        $args1 = array(
+			'client_key' => $data1,
+		);
+        $login_api_url = 'https://api.addtobasket.net/ws/wp/set_login';
+        $verifyResponse = wp_remote_post($login_api_url , $args1);
+
+        if (is_wp_error($verifyResponse)) {
+            return false; // Verification failed
+        }
+		$verifyBody = wp_remote_retrieve_body($verifyResponse);
+        $o_access_key = json_decode($verifyBody, true);
+		update_option( $this->plugin_name . '_a2b_access', $o_access_key );
+
+		// import products
+		if($i_can_import_products == 1) {
+			$decodedData = json_decode($jsonData);
+
+			$validateToAPI = new stdClass();
+			$validateToAPI->ISTANBUL = $o_access_key['ISTANBUL'];
+			$validateToAPI->NEWYORK = $o_access_key['NEWYORK'];
+			$validateToAPI->SESS_BRIDGE = $o_access_key['SESS_BRIDGE'];
+			$validateToAPI->LONDON = $o_access_key['LONDON'];
+			$validateToAPI->FRANKFURT = $o_access_key['FRANKFURT'];
+
+			$args2 = array(
+				's_tahir' => array("userContent" => array($validateToAPI)),
+			);
+
+			//wp_die(json_encode($args2));
+			$products_api_url = 'https://api.addtobasket.net/ws/wp/get_products';
+            $productResponse = wp_remote_post($login_api_url , $args2);
+			//wp_die(json_encode($productResponse['body']));
+			if (is_wp_error($productResponse)) {
+				return false; // Verification failed
+			}
+			$productsBody = wp_remote_retrieve_body($productResponse);
+			$products = json_decode($productsBody, true);
+
+			$this->sync_products_a2b_and_woocommerce($products);
+			
+		}
+
+		$options = get_option($this->plugin_name.'-options');
+		// if(isset($options['client-key'])){
+		// 	//define('A2B_ACTIVE', true);
+		// 	$this->clientValid = true;
+		// 	return true;
+		// }
+		// //define('A2B_ACTIVE', false);
+		// $this->clientValid = false;
+		return true;
+	}
+
+	/**
+	 * Sync products to A2B and Woommerce
+	 */
+	private function sync_products_a2b_and_woocommerce($products) {
+		
+		$new_post = array(
+			'post_title' => 'Iphone XXI',
+			'post_content' => '',
+			'post_status' => 'public',
+			'post_type' => $this->plugin_name
+		);
+
+		$post_id = wp_insert_post( $new_post );
+		
+		if( $post_id ){
+			update_option( $this->plugin_name . '_a2b_products', $products ); // Save the products to the database (temporary)
+			// Update custom field on the new post
+			//update_post_meta( $post_id, 'my_custom_field', 'Hello!' );
+
+			// $plugin_metaboxes = new Add_to_basket_Metaboxes( $this->plugin_name, ADD_TO_BASKET_VERSION );
+			// $metas = $plugin_metaboxes->get_metabox_fields();
+			// foreach ($metas as $meta) {
+			// 	$name = $meta[0];
+			// 	$type = $meta[1];
+			// 	$new_value = $plugin_metaboxes->sanitizer($type, 'Some value');
+			// 	update_post_meta($post_id, $name, $new_value);
+			// } 
+			
+		} else {
+			echo "Error, post not inserted";
+		}
+	}
 
 
 	/**
@@ -74,6 +214,14 @@ class Add_To_Basket_Woocommerce extends WC_Payment_Gateway{
 				'description' => __( 'Add your API key', 'add2basket' ),
 				'desc_tip'    => true,
 			),
+			'sync_products'             => array(
+				'title'       => __( 'Sync Products', 'add2basket' ),
+				'type'        => 'checkbox',
+				'description' => __( 'Snyc products between "Add to basket" and "Woocommerce".', 'add2basket' ),
+				//'desc_tip'    => __( 'The plugin will attempt to match products between woocommerce and add to basket.', 'add2basket' ),
+				'desc_tip'    => true,
+				'default'     => 'no',
+			),
 			'widget_id'           => array(
 				'title'       => __( 'Widget ID', 'add2basket' ),
 				'type'        => 'text',
@@ -84,14 +232,14 @@ class Add_To_Basket_Woocommerce extends WC_Payment_Gateway{
 				'title'       => __( 'Description', 'add2basket' ),
 				'type'        => 'textarea',
 				'description' => __( 'Add  to basket allows you to have multiple payments methods and also manage products from dedicated ecommerce platform', 'add2basket' ),
-				'default'     => __( 'Add To Basket before delivery.', 'add2basket' ),
+				'default'     => __( 'Add  to basket allows you to have multiple payments methods and also manage products from dedicated ecommerce platform', 'add2basket' ),
 				'desc_tip'    => true,
 			),
 			'instructions'       => array(
 				'title'       => __( 'Instructions', 'add2basket' ),
 				'type'        => 'textarea',
 				'description' => __( 'Instructions that will be added to the thank you page.', 'add2basket' ),
-				'default'     => __( 'Add To Basket before delivery.', 'add2basket' ),
+				'default'     => __( 'First login to <a href="addtobasket.com">addtobasket.com</a>,and get api key. We take care of the rest for you, to sync your products.', 'add2basket' ),
 				'desc_tip'    => true,
 			),
 			'enable_for_methods' => array(
@@ -115,6 +263,14 @@ class Add_To_Basket_Woocommerce extends WC_Payment_Gateway{
 			),
 		);
 	}
+
+	/**
+	 * Sets the class variable $options
+	 */
+	private function set_options() {
+		$this->options = get_option( $this->plugin_name . '-options' );
+	} // set_options()
+
     
 
 	/**

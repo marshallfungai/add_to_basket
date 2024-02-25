@@ -30,6 +30,7 @@ if ( ! defined( 'WPINC' ) ) die;     // If this file is called directly, abort.
 // Define plugin globals
 //define('ADD_TO_BASKET_ACTIVE', false);
 define( 'ADD_TO_BASKET_VERSION', '1.0.0' );
+define( 'ADD_TO_BASKET_PLUGIN_NAME', 'add-to-basket' );
 define( 'ADD_TO_BASKET_PATH', plugin_dir_path( __FILE__ ) );
 
 
